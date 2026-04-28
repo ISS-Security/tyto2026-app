@@ -1,0 +1,13 @@
+_*
+config/secrets.yml
+*.log
+.DS_Store
+tmp/
+.bundle/
+vendor/bundle
+CLAUDE.local.md
+.claude/*
+!.claude/CLAUDE.md
+!.claude/settings.json
+!.claude/skills/
+!.claude/plans/
