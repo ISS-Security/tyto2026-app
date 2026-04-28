@@ -1,0 +1,10 @@
+div class="d-flex justify-content-between align-items-center mb-3"
+  h1 Courses
+  a class="btn btn-primary" href="/courses/new" Create Course
+
+- if courses.empty?
+  p class="text-muted" No courses yet. Create the first one to get started.
+- else
+  div class="row row-cols-1 row-cols-md-2 g-3"
+    - courses.each do |course|
+      == render '_course_card', locals: { course: course }

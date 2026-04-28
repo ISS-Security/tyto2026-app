@@ -1,0 +1,10 @@
+- attrs = course['attributes']
+div class="col"
+  div class="card h-100"
+    div class="card-body"
+      h5 class="card-title"
+        a href="/courses/#{attrs['id']}"
+          = attrs['name']
+      - if attrs['description'] && !attrs['description'].empty?
+        p class="card-text text-muted force-wrap"
+          = attrs['description']

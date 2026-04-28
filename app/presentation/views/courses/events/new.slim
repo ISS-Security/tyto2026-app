@@ -1,0 +1,28 @@
+- course_attrs = course['course']['attributes']
+- course_id = course_attrs['id']
+
+h1 Schedule event for #{course_attrs['name']}
+
+- if course['locations'].empty?
+  div class="alert alert-warning"
+    | This course has no locations yet. Add a location first before scheduling events.
+  a class="btn btn-secondary" href="/courses/#{course_id}/locations/new" Add Location
+- else
+  form method='post' action="/courses/#{course_id}/events" accept-charset="UTF-8"
+    div class="form-group mb-3"
+      label for='input-event-name' Event name
+      input type='text' name='name' id='input-event-name' class="form-control" required="required" maxlength="200"
+    div class="form-group mb-3"
+      label for='input-event-start' Start
+      input type='datetime-local' name='start_at' id='input-event-start' class="form-control" required="required"
+    div class="form-group mb-3"
+      label for='input-event-end' End
+      input type='datetime-local' name='end_at' id='input-event-end' class="form-control" required="required"
+    div class="form-group mb-3"
+      label for='input-event-location' Location
+      select name='location_id' id='input-event-location' class="form-select" required="required"
+        - course['locations'].each do |location|
+          option value=location['attributes']['id']
+            = location['attributes']['name']
+    button type='submit' class="btn btn-primary" Schedule event
+    a class="btn btn-link" href="/courses/#{course_id}" Cancel

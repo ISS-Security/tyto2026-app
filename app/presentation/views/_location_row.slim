@@ -1,0 +1,6 @@
+- attrs = location['attributes']
+li class="list-group-item d-flex justify-content-between align-items-center"
+  strong
+    = attrs['name']
+  span class="text-muted small font-monospace"
+    = "#{attrs['latitude'].to_f.round(4)}, #{attrs['longitude'].to_f.round(4)}"

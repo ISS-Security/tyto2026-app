@@ -1,0 +1,14 @@
+- attrs = event['attributes']
+- include_data = event['include'] || {}
+- location = include_data['location']
+- location_attrs = location && location.is_a?(Hash) ? (location['attributes'] || location) : nil
+
+li class="list-group-item"
+  div class="d-flex justify-content-between"
+    strong
+      = attrs['name']
+    span class="text-muted small"
+      - if location_attrs
+        = location_attrs['name']
+  div class="text-muted small"
+    = "#{attrs['start_at']} -- #{attrs['end_at']}"

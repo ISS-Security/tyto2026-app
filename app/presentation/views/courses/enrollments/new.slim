@@ -1,0 +1,17 @@
+h1 Enroll a member
+
+form method='post' action="/courses/#{course_id}/enrollments" accept-charset="UTF-8"
+  div class="form-group mb-3"
+    label for='input-username' Username
+    input type='text' name='username' id='input-username' class="form-control" required="required" pattern="\\w{4,}"
+    div class="form-text"
+      | 4+ letters, digits, or underscores. Account must already exist.
+  div class="form-group mb-3"
+    label for='input-role' Role
+    select name='role_name' id='input-role' class="form-select" required="required"
+      option value="student" student
+      option value="staff" staff
+      option value="instructor" instructor
+      option value="owner" owner
+  button type='submit' class="btn btn-primary" Enroll member
+  a class="btn btn-link" href="/courses/#{course_id}" Cancel

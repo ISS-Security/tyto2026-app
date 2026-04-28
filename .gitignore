@@ -1,4 +1,5 @@
 _*
+!app/presentation/views/_*.slim
 config/secrets.yml
 *.log
 .DS_Store
