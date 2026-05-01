@@ -48,5 +48,5 @@ section class="mb-4"
     p class="text-muted" No enrollments yet.
   - else
     ul class="list-group"
-      - course['enrollments'].each do |enrollment|
-        == render '_enrollment_row', locals: { enrollment: enrollment, course_id: course_id, teaching: teaching }
+      - course['enrollments'].group_by { |e| e['attributes']['account_id'] }.each_value do |group|
+        == render '_enrollment_row', locals: { enrollments: group, course_id: course_id, teaching: teaching }

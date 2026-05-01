@@ -14,7 +14,7 @@ module Tyto
       def initialize(status, body)
         @status = status
         @body = body
-        super("API error #{status}: #{body['message']}")
+        super(body.is_a?(Hash) ? body['message'].to_s : body.to_s)
       end
     end
 
@@ -31,6 +31,10 @@ module Tyto
       parse(HTTP.post(url(path), json: body))
     end
 
+    def put(path, body)
+      parse(HTTP.put(url(path), json: body))
+    end
+
     def delete(path, body = nil)
       request = HTTP.headers('Content-Type' => 'application/json')
       response = body ? request.delete(url(path), body: body.to_json) : request.delete(url(path))
@@ -39,6 +43,10 @@ module Tyto
 
     def authenticated_post(path, body, current_account_id:)
       post(path, body.merge(current_account_id: current_account_id))
+    end
+
+    def authenticated_put(path, body, current_account_id:)
+      put(path, body.merge(current_account_id: current_account_id))
     end
 
     def authenticated_delete(path, current_account_id:)

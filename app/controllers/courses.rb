@@ -12,6 +12,10 @@ module Tyto
 
       # GET /courses/new
       routing.is 'new' do
+        unless course_creator?(@current_account)
+          flash[:error] = 'Only creators or admins can create courses'
+          routing.redirect '/courses'
+        end
         view 'courses/new'
       end
 

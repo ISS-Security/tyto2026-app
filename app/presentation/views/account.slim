@@ -1,3 +1,10 @@
+- system_roles = (account.dig('include', 'system_roles') || []).sort
+- enrollments = account.dig('include', 'enrollments') || []
+- is_self = viewer && viewer['username'] == account['username']
+- viewer_is_admin = (viewer&.dig('include', 'system_roles') || []).include?('admin')
+- can_manage = viewer_is_admin && !is_self
+- assignable = %w[admin creator member] - system_roles
+
 h1 Account Details
 
 div class="container"
@@ -5,9 +12,47 @@ div class="container"
     div class="col-sm-3"
       strong Username:
     div class="col-sm-9"
-      = current_account['username']
+      = account['username']
   div class="row mb-2"
     div class="col-sm-3"
       strong Email:
     div class="col-sm-9"
-      = current_account['email']
+      = account['email']
+
+  div class="row mb-3 mt-4"
+    div class="col-sm-3"
+      strong System roles:
+    div class="col-sm-9"
+      - if system_roles.empty?
+        span class="text-muted" No system roles
+      - else
+        - system_roles.each do |role|
+          span class="badge bg-dark me-1"
+            = role
+          - if can_manage
+            form method='post' action="/account/#{account['username']}/system_roles/#{role}" class="d-inline me-2"
+              input type='hidden' name='_method' value='delete'
+              button type='submit' class="btn btn-sm btn-outline-danger py-0" Revoke
+
+      - if can_manage && !assignable.empty?
+        div class="mt-2 d-flex flex-wrap gap-2"
+          - assignable.each do |role|
+            form method='post' action="/account/#{account['username']}/system_roles/#{role}" class="d-inline"
+              input type='hidden' name='_method' value='put'
+              button type='submit' class="btn btn-sm btn-outline-primary"
+                | Grant&nbsp;
+                = role
+
+  div class="row mb-2"
+    div class="col-sm-3"
+      strong Course roles:
+    div class="col-sm-9"
+      - if enrollments.empty?
+        span class="text-muted" Not enrolled in any courses
+      - else
+        ul class="list-unstyled mb-0"
+          - enrollments.each do |e|
+            li
+              span class="me-2"
+                = e['course_name']
+              == render '_role_badge', locals: { role: e['role'] }

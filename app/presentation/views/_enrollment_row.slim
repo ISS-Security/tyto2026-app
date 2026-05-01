@@ -1,11 +1,15 @@
-- attrs = enrollment['attributes']
-- username = enrollment.dig('include', 'account', 'username') || "Account ##{attrs['account_id']}"
-li class="list-group-item d-flex justify-content-between align-items-center"
-  div
+- first = enrollments.first
+- username = first.dig('include', 'account', 'username') || "Account ##{first['attributes']['account_id']}"
+
+li class="list-group-item"
+  div class="d-flex flex-wrap align-items-center gap-2"
     span class="me-2"
       = username
-    == render '_role_badge', locals: { role: attrs['role'] }
-  - if teaching
-    form method='post' action="/courses/#{course_id}/enrollments/#{attrs['id']}" class="d-inline"
-      input type='hidden' name='_method' value='delete'
-      button type='submit' class="btn btn-sm btn-outline-danger" Remove
+    - enrollments.each do |e|
+      - attrs = e['attributes']
+      span class="d-inline-flex align-items-center"
+        == render '_role_badge', locals: { role: attrs['role'] }
+        - if teaching
+          form method='post' action="/courses/#{course_id}/enrollments/#{attrs['id']}" class="d-inline ms-1"
+            input type='hidden' name='_method' value='delete'
+            button type='submit' class="btn btn-sm btn-link text-danger p-0 lh-1" aria-label="Remove #{attrs['role']}" title="Remove #{attrs['role']}" &times;

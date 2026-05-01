@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'rack/method_override'
 require 'roda'
 require 'slim'
 require 'slim/include'
@@ -7,6 +8,8 @@ require 'slim/include'
 module Tyto
   # Base class for the Tyto Web App
   class App < Roda
+    use Rack::MethodOverride
+
     plugin :render, engine: 'slim', views: 'app/presentation/views'
     plugin :assets, css: 'style.css', path: 'app/presentation/assets'
     plugin :public, root: 'app/presentation/public'
@@ -43,6 +46,20 @@ module Tyto
       current_account['include']['enrollments']
         .select { |e| e['course_id'] == course_id }
         .map { |e| e['role'] }
+    end
+
+    # Raw-hash helper. Will be replaced by an Account predicate when
+    # App-side parser models land in 4-validation alongside 7-policies.
+    def admin?(current_account)
+      system_roles_of(current_account).include?('admin')
+    end
+
+    def course_creator?(current_account)
+      system_roles_of(current_account).intersect?(%w[creator admin])
+    end
+
+    def system_roles_of(current_account)
+      current_account&.dig('include', 'system_roles') || []
     end
   end
 end
