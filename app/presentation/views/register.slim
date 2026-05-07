@@ -1,0 +1,17 @@
+div class="row"
+  div class="col-sm-3"
+  div class="col-sm-6"
+    h4 class="text-center" Create an account
+    form method='post' action='/auth/register' id='form-register' accept-charset="UTF-8"
+      div class="form-group mb-3"
+        label for='input-username' Username
+        input type='text' name='username' id='input-username' class="form-control" required="required"
+      div class="form-group mb-3"
+        label for='input-email' Email
+        input type='email' name='email' id='input-email' class="form-control" required="required"
+      div class="form-group mb-3"
+        label for='input-password' Password
+        input type='password' name='password' id='input-password' class="form-control" required="required"
+
+      button type='submit' id='button-register' value='register' class="btn btn-primary w-100" Register
+  div class="col-sm-3"
