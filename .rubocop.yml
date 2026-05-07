@@ -1,0 +1,22 @@
+---
+AllCops:
+  TargetRubyVersion: 4.0
+  NewCops: enable
+  SuggestExtensions: true
+  Exclude:
+    - _snippets/**/*
+
+plugins:
+  - rubocop-performance
+
+Metrics/BlockLength:
+  Enabled: true
+  Exclude:
+    - spec/**/* # Minitest/test scaffolding requires large blocks
+    - Rakefile  # Rake namespaces produce large blocks
+    - app/controllers/*.rb # Roda's nested controllers require large blocks
+
+Style/HashSyntax:
+  Enabled: true
+  Exclude:
+    - Rakefile

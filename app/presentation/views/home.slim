@@ -1,0 +1,12 @@
+h1 Welcome to Tyto
+p Tyto records course attendance using time-windowed events and geolocation-verified check-ins. Instructors define class meetings and venues; students confirm attendance from inside the room during the event window.
+
+p
+  i This is a teaching demo, not for live grading.
+
+- if current_account.nil?
+  p
+    a class="btn btn-primary" href='/auth/login' Log in to get started
+- else
+  p
+    a class="btn btn-primary" href='/courses' Go to courses

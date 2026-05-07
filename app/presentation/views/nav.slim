@@ -1,0 +1,25 @@
+nav role="navigation" class="navbar navbar-expand-sm navbar-dark bg-primary"
+  div class="container-fluid"
+    a class="navbar-brand" rel="home" href="/" title="Tyto -- geo-attendance for courses"
+      img alt="Tyto" src="/logo.png" class="logo"
+    a class="navbar-brand" href="/" Tyto
+    button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation"
+      span class="navbar-toggler-icon"
+
+    div class="collapse navbar-collapse" id="mainNavbar"
+      ul class="navbar-nav me-auto"
+        - if @current_account
+          li class="nav-item"
+            a class="nav-link" href="/courses" Courses
+          li class="nav-item dropdown"
+            a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"
+              = @current_account['username']
+
+            div class="dropdown-menu"
+              a class="dropdown-item" href="/account/#{@current_account['username']}" account
+              a class="dropdown-item" href='/auth/logout' logout
+        - else
+          li class="nav-item"
+            a class="nav-link active" href='/auth/login' login
+          li class="nav-item"
+            a class="nav-link disabled" href='#' aria-disabled="true" register (coming soon)

@@ -1,0 +1,52 @@
+- course_attrs = course['course']['attributes']
+- course_id = course_attrs['id']
+- teaching = (my_roles & %w[owner instructor staff]).any?
+
+div class="d-flex justify-content-between align-items-start mb-3"
+  div
+    h1
+      = course_attrs['name']
+    p class="text-muted force-wrap"
+      = course_attrs['description']
+  - if my_roles.any?
+    div class="d-flex gap-1 flex-wrap"
+      - my_roles.each do |role|
+        == render '_role_badge', locals: { role: role }
+
+hr
+
+section class="mb-4"
+  div class="d-flex justify-content-between align-items-center mb-2"
+    h3 Events
+    - if teaching
+      a class="btn btn-sm btn-outline-primary" href="/courses/#{course_id}/events/new" Add Event
+  - if course['events'].empty?
+    p class="text-muted" No events scheduled.
+  - else
+    ul class="list-group"
+      - course['events'].each do |event|
+        == render '_event_row', locals: { event: event }
+
+section class="mb-4"
+  div class="d-flex justify-content-between align-items-center mb-2"
+    h3 Locations
+    - if teaching
+      a class="btn btn-sm btn-outline-primary" href="/courses/#{course_id}/locations/new" Add Location
+  - if course['locations'].empty?
+    p class="text-muted" No locations defined.
+  - else
+    ul class="list-group"
+      - course['locations'].each do |location|
+        == render '_location_row', locals: { location: location }
+
+section class="mb-4"
+  div class="d-flex justify-content-between align-items-center mb-2"
+    h3 Enrollments
+    - if teaching
+      a class="btn btn-sm btn-outline-primary" href="/courses/#{course_id}/enrollments/new" Enroll Member
+  - if course['enrollments'].empty?
+    p class="text-muted" No enrollments yet.
+  - else
+    ul class="list-group"
+      - course['enrollments'].group_by { |e| e['attributes']['account_id'] }.each_value do |group|
+        == render '_enrollment_row', locals: { enrollments: group, course_id: course_id, teaching: teaching }

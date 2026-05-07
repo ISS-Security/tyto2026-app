@@ -1,0 +1,42 @@
+h1 Add location
+
+p class="text-muted"
+  | Tyto records the venue's coordinates from your browser. Click "Get my current location" while standing at the venue. Permission is required.
+
+form method='post' action="/courses/#{course_id}/locations" id='form-location' accept-charset="UTF-8"
+  div class="form-group mb-3"
+    label for='input-location-name' Venue name
+    input type='text' name='name' id='input-location-name' class="form-control" required="required" maxlength="200"
+
+  input type='hidden' name='latitude' id='input-latitude'
+  input type='hidden' name='longitude' id='input-longitude'
+
+  div class="mb-3"
+    button type='button' id='get-location-btn' class="btn btn-outline-secondary" Get my current location
+    span id='coords-display' class="ms-2 text-muted"
+
+  button type='submit' id='submit-location' class="btn btn-primary" disabled="disabled" Save location
+  a class="btn btn-link" href="/courses/#{course_id}" Cancel
+
+javascript:
+  document.getElementById('get-location-btn').addEventListener('click', function() {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by this browser. Cannot create location.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        var lat = position.coords.latitude;
+        var lon = position.coords.longitude;
+        document.getElementById('input-latitude').value = lat;
+        document.getElementById('input-longitude').value = lon;
+        document.getElementById('coords-display').textContent =
+          'Lat ' + lat.toFixed(6) + ', Lon ' + lon.toFixed(6);
+        document.getElementById('submit-location').disabled = false;
+      },
+      function(err) {
+        alert('Location permission denied or unavailable: ' + err.message + '. Cannot create location without coordinates.');
+        document.getElementById('submit-location').disabled = true;
+      }
+    );
+  });
