@@ -11,7 +11,7 @@ module Tyto
         # POST /account/[registration_token]
         # Completes registration by setting a password.
         routing.post do
-          new_account = SecureMessage.new(username_or_token).decrypt
+          token = RegistrationToken.load(username_or_token)
           password = routing.params['password'].to_s
           password_confirm = routing.params['password_confirm'].to_s
 
@@ -21,12 +21,15 @@ module Tyto
           end
 
           CreateAccount.new(App.config).call(
-            email: new_account['email'],
-            username: new_account['username'],
+            email: token.email,
+            username: token.username,
             password: password
           )
           flash[:notice] = 'Account created -- please log in'
           routing.redirect '/auth/login'
+        rescue RegistrationToken::InvalidTokenError
+          flash[:error] = 'Verification link is invalid or expired'
+          routing.redirect '/auth/register'
         rescue StandardError => e
           App.logger.error "ERROR CREATING ACCOUNT: #{e.inspect}"
           flash[:error] = 'Could not create account'

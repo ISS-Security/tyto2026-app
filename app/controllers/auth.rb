@@ -55,13 +55,13 @@ module Tyto
         # GET /auth/register/[registration_token]
         # Decrypts token; shows the password-entry form.
         routing.is String do |registration_token|
-          new_account = SecureMessage.new(registration_token).decrypt
+          token = RegistrationToken.load(registration_token)
           view :register_confirm, locals: {
             registration_token: registration_token,
-            email: new_account['email'],
-            username: new_account['username']
+            email: token.email,
+            username: token.username
           }
-        rescue StandardError
+        rescue RegistrationToken::InvalidTokenError
           flash[:error] = 'Verification link is invalid or expired'
           routing.redirect @register_route
         end

@@ -66,13 +66,13 @@ Three coupled pieces:
 
 | Risk | Addressed here | Deferred |
 | --- | --- | --- |
-| API trusts whatever `current_account_id` the App sends in the request body | Replaced with API-issued encrypted `auth_token` carried in the `Authorization: Bearer` header | Policy enforcement (deferred per project rules) |
+| API trusts whatever `current_account_id` the App sends in the request body | Replaced with API-issued encrypted `auth_token` carried in the `Authorization: Bearer` header | Granular server-side authorization rules (deferred per project rules) |
 | Anyone could register an account for any email address | Email verification required: the user must click a link sent to that address before the account is created | Rate limiting / CAPTCHA (deferred) |
 | Registration token tampering | `SimpleBox` (XSalsa20-Poly1305 AEAD) — forging a token requires the App's `MSG_KEY` | Registration token expiration (Q2) |
 
 ### Notes on the refactor
 
-- **No parser models this week.** The session keeps storing `current_account` as a raw hash; we add `:auth_token` as a separate session key. UI helpers (`admin?`, `course_creator?`, `role_for_course`) remain raw-hash readers — they were added in an earlier branch and stay until parser models land.
+- **Raw-hash access continues.** The session keeps storing `current_account` as a raw hash; we add `:auth_token` as a separate session key. UI helpers (`admin?`, `course_creator?`, `role_for_course`) remain raw-hash readers, consistent with the existing pattern.
 - **`ApiClient` Bearer plumbing.** Add `auth_token:` kwarg to each method (`get / post / put / delete`). When present, send `Authorization: Bearer <token>`. Drop the `authenticated_post / put / delete` helpers that smuggled `current_account_id` into the body.
 - **Registration token expiration.** The registration token is long-lived this branch (matches the reference). A real fix would reuse the API-side token's expiration machinery — deferred per project rules.
 
@@ -82,7 +82,7 @@ Three coupled pieces:
 
 - [ ] **Q1 (ApiClient Bearer plumbing shape)**: pass `auth_token:` through every method call, or stash on `ApiClient` at construction? Default: pass through method calls — less stateful.
 - [ ] **Q2 (registration token expiration)**: the registration token has no expiration this branch. Default: keep as-is; document as a known limitation.
-- [ ] **Q3 (parser models confirmed deferred)**: default yes, deferred per project rules.
+- [ ] **Q3 (continue with raw-hash session storage?)**: default yes — no App-side data-model layer introduced this branch.
 - [ ] **Q4 (`current_account['id']` reachability post-refactor)**: after every service drops `current_account_id`, audit whether anything (controllers, views) still reads `@current_account['id']` from the session-stored raw hash. Report findings in Post-Impl Notes so the API plan's matching question can be settled with evidence.
 
 ## Scope
@@ -114,15 +114,13 @@ Three coupled pieces:
 
 **Out of scope** (deferred per project rules — do not creep in):
 
-- Parser models (`Account`, `Course`, `Courses`, `Event`, `Location`, `Enrollment`, `Attendance`)
-- Replacing raw-hash helpers (`admin?`, `course_creator?`, `role_for_course`, new `student_in?`) with parser-model predicates
-- Validation rules / form objects
-- Google Maps widget + geolocation prompt
-- Place-based eligibility (the geo half of attendance eligibility)
-- Staff UI for "view all event attendances" / "toggle attendance"
-- Registration token expiration
-- Browser security headers (CSP, X-Frame-Options, etc.)
-- Request signing
+- Any App-side data-model layer wrapping the API JSON envelope (raw-hash access continues)
+- Replacing the existing UI helpers (`admin?`, `course_creator?`, `role_for_course`, new `student_in?`) with model methods
+- Input-validation rules on form data
+- Any visualization or location-capture widget beyond plain HTML forms
+- Place-based attendance check (only the time-window half is consumed)
+- Staff UI for viewing or overriding event attendance
+- Registration-token expiration
 
 ## Security Concerns Addressed This Week
 
@@ -229,7 +227,7 @@ For each of the following services, drop `current_account_id` from the call sign
   Adds student attendance check-in with home-page eligible events      ← payload 2
   ```
 - **Payload 1 subject**: `Registration verification and token-based authorization`.
-- **Payload 2 subject**: `Adds student attendance check-in with home-page eligible events`. Body notes the raw-hash `student_in?` helper as consistent with the existing `admin?` / `course_creator?` pattern, and that map widgets + geolocation arrive in a later branch.
+- **Payload 2 subject**: `Adds student attendance check-in with home-page eligible events`. Body notes the raw-hash `student_in?` helper as consistent with the existing `admin?` / `course_creator?` pattern.
 
 ## Infrastructure setup (user-operated)
 
