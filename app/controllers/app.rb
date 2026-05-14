@@ -29,7 +29,23 @@ module Tyto
 
       # GET /
       routing.root do
-        view 'home', locals: { current_account: @current_account }
+        eligible_events =
+          if @current_account.logged_in?
+            ListEligibleEvents.new(App.config).call(@current_account)
+          else
+            []
+          end
+
+        view 'home', locals: {
+          current_account: @current_account,
+          eligible_events: eligible_events
+        }
+      rescue StandardError => e
+        App.logger.warn "Eligible-events lookup failed: #{e.message}"
+        view 'home', locals: {
+          current_account: @current_account,
+          eligible_events: []
+        }
       end
     end
 

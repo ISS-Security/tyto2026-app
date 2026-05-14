@@ -21,6 +21,26 @@ module Tyto
       routing.on String do |course_id|
         course_id = Integer(course_id, exception: false) || course_id
 
+        routing.on 'attendances' do
+          # POST /courses/[course_id]/attendances
+          routing.post do
+            RecordAttendance.new(App.config).call(
+              @current_account,
+              course_id: course_id,
+              event_id: routing.params['event_id']
+            )
+            flash[:notice] = 'Checked in to event'
+            routing.redirect "/courses/#{course_id}"
+          rescue ApiClient::ApiError => e
+            flash[:error] = "Could not check in: #{e.message}"
+            routing.redirect "/courses/#{course_id}"
+          rescue StandardError => e
+            App.logger.error "ATTENDANCE ERROR: #{e.inspect}"
+            flash[:error] = 'Could not record attendance'
+            routing.redirect "/courses/#{course_id}"
+          end
+        end
+
         routing.on 'events' do
           # GET /courses/[course_id]/events/new
           routing.is 'new' do
