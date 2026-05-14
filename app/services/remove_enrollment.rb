@@ -7,10 +7,10 @@ module Tyto
       @client = ApiClient.new(config)
     end
 
-    def call(current_account_id:, course_id:, enrollment_id:)
-      @client.authenticated_delete(
+    def call(current_account, course_id:, enrollment_id:)
+      @client.delete(
         "/courses/#{course_id}/enrollments/#{enrollment_id}",
-        current_account_id: current_account_id
+        auth_token: current_account.auth_token
       )
     end
   end

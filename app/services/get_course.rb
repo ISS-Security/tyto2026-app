@@ -9,15 +9,15 @@ module Tyto
       @client = ApiClient.new(config)
     end
 
-    def call(course_id, current_account_id:)
+    def call(current_account, course_id:)
       base = "/courses/#{course_id}"
-      params = { current_account_id: current_account_id }
+      auth_token = current_account.auth_token
 
       {
-        'course' => @client.get(base, params: params),
-        'events' => @client.get("#{base}/events", params: params).fetch('data', []),
-        'locations' => @client.get("#{base}/locations", params: params).fetch('data', []),
-        'enrollments' => @client.get("#{base}/enrollments", params: params).fetch('data', [])
+        'course' => @client.get(base, auth_token: auth_token),
+        'events' => @client.get("#{base}/events", auth_token: auth_token).fetch('data', []),
+        'locations' => @client.get("#{base}/locations", auth_token: auth_token).fetch('data', []),
+        'enrollments' => @client.get("#{base}/enrollments", auth_token: auth_token).fetch('data', [])
       }
     end
   end

@@ -8,11 +8,10 @@ module Tyto
   class App < Roda # rubocop:disable Metrics/ClassLength
     route('courses') do |routing|
       require_login!(routing)
-      current_account_id = @current_account['id']
 
       # GET /courses/new
       routing.is 'new' do
-        unless course_creator?(@current_account)
+        unless @current_account.course_creator?
           flash[:error] = 'Only creators or admins can create courses'
           routing.redirect '/courses'
         end
@@ -26,13 +25,13 @@ module Tyto
           # GET /courses/[course_id]/events/new
           routing.is 'new' do
             view 'courses/events/new',
-                 locals: { course: GetCourse.new(App.config).call(course_id, current_account_id: current_account_id) }
+                 locals: { course: GetCourse.new(App.config).call(@current_account, course_id: course_id) }
           end
 
           # POST /courses/[course_id]/events
           routing.post do
             CreateEventForCourse.new(App.config).call(
-              current_account_id: current_account_id,
+              @current_account,
               course_id: course_id,
               name: routing.params['name'],
               start_at: routing.params['start_at'],
@@ -56,7 +55,7 @@ module Tyto
           # POST /courses/[course_id]/locations
           routing.post do
             CreateLocationForCourse.new(App.config).call(
-              current_account_id: current_account_id,
+              @current_account,
               course_id: course_id,
               name: routing.params['name'],
               latitude: routing.params['latitude'],
@@ -79,7 +78,7 @@ module Tyto
           # POST /courses/[course_id]/enrollments
           routing.post do
             EnrollAccountInCourse.new(App.config).call(
-              current_account_id: current_account_id,
+              @current_account,
               course_id: course_id,
               username: routing.params['username'],
               role_name: routing.params['role_name']
@@ -95,7 +94,7 @@ module Tyto
           routing.on String do |enrollment_id|
             routing.delete do
               RemoveEnrollment.new(App.config).call(
-                current_account_id: current_account_id,
+                @current_account,
                 course_id: course_id,
                 enrollment_id: enrollment_id
               )
@@ -112,9 +111,9 @@ module Tyto
         routing.get do
           view 'courses/show',
                locals: {
-                 course: GetCourse.new(App.config).call(course_id, current_account_id: current_account_id),
+                 course: GetCourse.new(App.config).call(@current_account, course_id: course_id),
                  current_account: @current_account,
-                 my_roles: roles_for_course(course_id, @current_account)
+                 my_roles: @current_account.roles_for_course(course_id)
                }
         rescue ApiClient::ApiError => e
           flash[:error] = "Could not load course: #{e.message}"
@@ -125,13 +124,13 @@ module Tyto
       # GET /courses
       routing.get do
         view 'courses/index',
-             locals: { courses: ListCourses.new(App.config).call(current_account_id: current_account_id) }
+             locals: { courses: ListCourses.new(App.config).call(@current_account) }
       end
 
       # POST /courses
       routing.post do
         CreateCourse.new(App.config).call(
-          current_account_id: current_account_id,
+          @current_account,
           name: routing.params['name'],
           description: routing.params['description']
         )
