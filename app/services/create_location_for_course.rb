@@ -9,16 +9,16 @@ module Tyto
       @client = ApiClient.new(config)
     end
 
-    def call(current_account_id:, course_id:, name:, latitude:, longitude:)
+    def call(current_account, course_id:, name:, latitude:, longitude:)
       lat = Float(latitude, exception: false)
       lon = Float(longitude, exception: false)
       validate!(name: name, lat: lat, lon: lon)
 
       # API encrypts coords via SecureDB.encrypt, which requires a String.
-      @client.authenticated_post(
+      @client.post(
         "/courses/#{course_id}/locations",
         { name: name, latitude: lat.to_s, longitude: lon.to_s },
-        current_account_id: current_account_id
+        auth_token: current_account.auth_token
       )
     end
 

@@ -4,9 +4,16 @@ p Tyto records course attendance using time-windowed events and geolocation-veri
 p
   i This is a teaching demo, not for live grading.
 
-- if current_account.nil?
+- if current_account.logged_out?
   p
     a class="btn btn-primary" href='/auth/login' Log in to get started
 - else
+  - unless eligible_events.empty?
+    section class="mb-4"
+      h3 Events you can check in to right now
+      ul class="list-group"
+        - eligible_events.each do |event|
+          == render '_eligible_event_card', locals: { event: event }
+
   p
     a class="btn btn-primary" href='/courses' Go to courses

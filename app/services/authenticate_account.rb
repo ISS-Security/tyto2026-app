@@ -2,7 +2,8 @@
 
 module Tyto
   # Authenticate user credentials against the Tyto API.
-  # Returns the account attributes hash with embedded enrollments.
+  # Returns { account: <account_info hash>, auth_token: <opaque string> }
+  # for the caller to wrap into an Account model.
   class AuthenticateAccount
     class UnauthorizedError < StandardError; end
     class ApiServerError < StandardError; end
@@ -11,17 +12,23 @@ module Tyto
       @client = ApiClient.new(config)
     end
 
+    # rubocop:disable Metrics/MethodLength
     def call(username:, password:)
       validate_credentials!(username, password)
 
       response = @client.post('/auth/authenticate', { username: username, password: password })
-      response.fetch('attributes').merge('include' => response['include'])
+      attributes = response.fetch('attributes')
+      {
+        account: attributes.fetch('account'),
+        auth_token: attributes.fetch('auth_token')
+      }
     rescue ApiClient::ApiError => e
       raise UnauthorizedError, "Authentication failed: #{e.message}" if e.status == 403
       raise ApiServerError, e.message if e.status >= 500
 
       raise
     end
+    # rubocop:enable Metrics/MethodLength
 
     private
 

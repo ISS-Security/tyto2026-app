@@ -8,12 +8,13 @@ module Tyto
   # Encrypts and decrypts arbitrary JSON-serializable values via NaCl
   # SimpleBox (XSalsa20-Poly1305 AEAD with random nonce per-message).
   #
-  # Used  as the inner encryption layerunderneath rack-session 2.x's
+  # Used as the inner encryption layer underneath rack-session 2.x's
   # AES-256-GCM cookie encryption -- two authenticated encryption layers.
   #
-  # Used for pool/Redis session storage and registration / auth tokens. The
-  # single MSG_KEY env var covers both purposes -- sessions and tokens
-  # are both "messages" persisted off-process.
+  # Used for pool/Redis session storage. Registration tokens wrap this
+  # primitive in RegistrationToken (app/lib/registration_token.rb) so
+  # callers read .email / .username instead of dereferencing a string-
+  # keyed hash. The single MSG_KEY env var covers both purposes.
   class SecureMessage
     class << self
       attr_reader :key
