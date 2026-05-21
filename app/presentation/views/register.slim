@@ -4,13 +4,16 @@ div class="row"
     h4 class="text-center" Create an account
     p class="text-muted small"
       | We'll email you a verification link. Click it to set your password and finish creating your account.
+
+    == render '_validation_errors'
+
     form method='post' action='/auth/register' id='form-register' accept-charset="UTF-8"
       div class="form-group mb-3"
         label for='input-username' Username
-        input type='text' name='username' id='input-username' class="form-control" required="required"
+        input type='text' name='username' id='input-username' class="form-control" value=(params['username'] || '')
       div class="form-group mb-3"
         label for='input-email' Email
-        input type='email' name='email' id='input-email' class="form-control" required="required"
+        input type='email' name='email' id='input-email' class="form-control" value=(params['email'] || '')
 
       button type='submit' id='button-register' value='register' class="btn btn-primary w-100"
         | Send verification email

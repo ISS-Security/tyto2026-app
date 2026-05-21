@@ -26,6 +26,12 @@ gem 'redis', '~>5.0'
 # Security
 gem 'rbnacl', '~>7.1'
 
+# Validation
+gem 'dry-validation', '~>1.10'
+
+# Stdlib gems that left the default set in Ruby 3.5+
+gem 'ostruct'
+
 # Debugging
 gem 'pry'
 

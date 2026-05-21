@@ -1,0 +1,65 @@
+/ Compact map showing the event location + student's current position.
+/ Browser geolocation consent prompt fires on "Use my current location";
+/ on denial, inline error + explicit Retry button. No manual-coord bypass
+/ (would defeat the geofence security beat the API will enforce next week).
+
+div id="attendance-map-#{event.id}" style="height: 240px;" class="rounded border mb-2"
+div id="attendance-map-error-#{event.id}" class="text-danger small" style="display: none;"
+  span class="me-2"
+  button type='button' class="btn btn-sm btn-outline-secondary attendance-retry-btn" data-event-id=event.id
+    | Retry
+
+javascript:
+  (function() {
+    var eventId = "#{event.id}";
+    var locLat = #{event.location.latitude.to_f};
+    var locLon = #{event.location.longitude.to_f};
+    var mapEl = document.getElementById('attendance-map-' + eventId);
+    var errEl = document.getElementById('attendance-map-error-' + eventId);
+    if (typeof L === 'undefined') {
+      mapEl.style.display = 'none';
+      return;
+    }
+    var map = L.map(mapEl).setView([locLat, locLon], 17);
+    L.tileLayer(window.TytoMaps.OSM_TILE_URL, {
+      attribution: window.TytoMaps.OSM_ATTRIBUTION, maxZoom: 19
+    }).addTo(map);
+    L.marker([locLat, locLon]).addTo(map).bindPopup('Event location').openPopup();
+
+    var myMarker = null;
+    function showError(msg, retryable) {
+      errEl.querySelector('span').textContent = msg;
+      errEl.style.display = 'block';
+    }
+    function locate() {
+      errEl.style.display = 'none';
+      if (!navigator.geolocation) {
+        showError('Geolocation is not supported by this browser.');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          var myLat = position.coords.latitude;
+          var myLon = position.coords.longitude;
+          if (myMarker) {
+            myMarker.setLatLng([myLat, myLon]);
+          } else {
+            myMarker = L.marker([myLat, myLon], { opacity: 0.7 })
+                        .addTo(map).bindPopup('You are here');
+          }
+        },
+        function(err) {
+          if (err.code === 1) {
+            showError('Check-in requires location permission — adjust in browser site settings.');
+          } else {
+            showError('Location access required to check in.');
+          }
+        }
+      );
+    }
+    locate();
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.attendance-retry-btn[data-event-id="' + eventId + '"]'),
+      function(btn) { btn.addEventListener('click', locate); }
+    );
+  })();

@@ -51,6 +51,13 @@ module Tyto
 
     private
 
+    # Exposes the current request's params to view templates so re-rendered
+    # forms (Q3: render-in-place on validation failure) can repopulate fields
+    # with `value=(params['key'] || '')`.
+    def params
+      request.params
+    end
+
     def require_login!(routing)
       return if @current_account.logged_in?
 
