@@ -1,0 +1,23 @@
+- attrs = event['attributes']
+- include_data = event['include'] || {}
+- course = include_data['course']
+- course_attrs = course && course.is_a?(Hash) ? (course['attributes'] || course) : {}
+- course_id = course_attrs['id']
+- location = include_data['location']
+- location_attrs = location && location.is_a?(Hash) ? (location['attributes'] || location) : nil
+
+li class="list-group-item d-flex justify-content-between align-items-center"
+  div
+    strong
+      = course_attrs['name']
+    span class="text-muted ms-2"
+      = attrs['name']
+    div class="text-muted small"
+      = "#{attrs['start_at']} -- #{attrs['end_at']}"
+      - if location_attrs
+        span class="ms-2"
+          | @&nbsp;
+          = location_attrs['name']
+  form method='post' action="/courses/#{course_id}/attendances" class="m-0"
+    input type='hidden' name='event_id' value=attrs['id']
+    button type='submit' class="btn btn-sm btn-success" Check in

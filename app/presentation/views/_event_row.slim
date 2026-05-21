@@ -2,13 +2,25 @@
 - include_data = event['include'] || {}
 - location = include_data['location']
 - location_attrs = location && location.is_a?(Hash) ? (location['attributes'] || location) : nil
+- can_check_in = viewer && viewer.student_in?(course_id)
+- start_t = (Time.iso8601(attrs['start_at'].to_s) rescue nil)
+- end_t   = (Time.iso8601(attrs['end_at'].to_s)   rescue nil)
+- live_now = start_t && end_t && start_t <= Time.now && Time.now <= end_t
 
 li class="list-group-item"
-  div class="d-flex justify-content-between"
-    strong
-      = attrs['name']
-    span class="text-muted small"
-      - if location_attrs
-        = location_attrs['name']
-  div class="text-muted small"
-    = "#{attrs['start_at']} -- #{attrs['end_at']}"
+  div class="d-flex justify-content-between align-items-center"
+    div
+      strong
+        = attrs['name']
+      span class="text-muted small ms-2"
+        - if location_attrs
+          = location_attrs['name']
+      div class="text-muted small"
+        = "#{attrs['start_at']} -- #{attrs['end_at']}"
+    div
+      - if attrs['my_attendance_id']
+        span class="badge bg-success" Attended &#10003;
+      - elsif can_check_in && live_now
+        form method='post' action="/courses/#{course_id}/attendances" class="m-0"
+          input type='hidden' name='event_id' value=attrs['id']
+          button type='submit' class="btn btn-sm btn-success" Check in

@@ -11,13 +11,13 @@ module Tyto
       @client = ApiClient.new(config)
     end
 
-    def call(current_account_id:, course_id:, username:, role_name:)
+    def call(current_account, course_id:, username:, role_name:)
       raise InvalidInput, "Role must be one of: #{VALID_ROLES.join(', ')}" unless VALID_ROLES.include?(role_name)
 
-      @client.authenticated_post(
+      @client.post(
         "/courses/#{course_id}/enrollments/#{username}",
         { role_name: role_name },
-        current_account_id: current_account_id
+        auth_token: current_account.auth_token
       )
     end
   end

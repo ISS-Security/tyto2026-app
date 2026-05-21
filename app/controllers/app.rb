@@ -21,7 +21,7 @@ module Tyto
       routing.redirect_http_to_https if App.environment == :production
 
       response['Content-Type'] = 'text/html; charset=utf-8'
-      @current_account = SecureSession.new(session).get(:current_account)
+      @current_account = CurrentSession.new(session).current_account
 
       routing.public
       routing.assets
@@ -29,39 +29,33 @@ module Tyto
 
       # GET /
       routing.root do
-        view 'home', locals: { current_account: @current_account }
+        eligible_events =
+          if @current_account.logged_in?
+            ListEligibleEvents.new(App.config).call(@current_account)
+          else
+            []
+          end
+
+        view 'home', locals: {
+          current_account: @current_account,
+          eligible_events: eligible_events
+        }
+      rescue StandardError => e
+        App.logger.warn "Eligible-events lookup failed: #{e.message}"
+        view 'home', locals: {
+          current_account: @current_account,
+          eligible_events: []
+        }
       end
     end
 
     private
 
     def require_login!(routing)
-      return if @current_account
+      return if @current_account.logged_in?
 
       flash[:error] = 'Please log in to continue'
       routing.redirect '/auth/login'
-    end
-
-    def roles_for_course(course_id, current_account)
-      return [] unless current_account && current_account['include']
-
-      current_account['include']['enrollments']
-        .select { |e| e['course_id'] == course_id }
-        .map { |e| e['role'] }
-    end
-
-    # Raw-hash helper. Will be replaced by an Account predicate when
-    # App-side parser models land in 4-validation alongside 7-policies.
-    def admin?(current_account)
-      system_roles_of(current_account).include?('admin')
-    end
-
-    def course_creator?(current_account)
-      system_roles_of(current_account).intersect?(%w[creator admin])
-    end
-
-    def system_roles_of(current_account)
-      current_account&.dig('include', 'system_roles') || []
     end
   end
 end

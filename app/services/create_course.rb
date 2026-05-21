@@ -9,12 +9,12 @@ module Tyto
       @client = ApiClient.new(config)
     end
 
-    def call(current_account_id:, name:, description: nil)
+    def call(current_account, name:, description: nil)
       validate!(name: name, description: description)
-      @client.authenticated_post(
+      @client.post(
         '/courses',
         { name: name, description: description },
-        current_account_id: current_account_id
+        auth_token: current_account.auth_token
       )
     end
 

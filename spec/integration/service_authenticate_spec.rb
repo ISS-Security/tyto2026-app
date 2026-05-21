@@ -7,30 +7,35 @@ describe 'AuthenticateAccount service' do
   before do
     @credentials = { username: 'soumya.ray', password: 'mypa$$w0rd' }
     @bad_credentials = { username: 'soumya.ray', password: 'wrong_password' }
-    @api_response = {
+    @account_envelope = {
       type: 'account',
-      attributes: { id: 1, username: 'soumya.ray', email: 'sray@nthu.edu.tw' },
+      attributes: { username: 'soumya.ray', email: 'sray@nthu.edu.tw' },
       include: { enrollments: [], system_roles: [] }
+    }
+    @api_response = {
+      type: 'authenticated_account',
+      attributes: {
+        account: @account_envelope,
+        auth_token: 'opaque.encrypted.bearer'
+      }
     }
   end
 
-  after do
-    WebMock.reset!
-  end
+  after { WebMock.reset! }
 
-  it 'HAPPY: returns the authenticated account' do
+  it 'HAPPY: returns account hash and auth_token' do
     WebMock.stub_request(:post, "#{API_URL}/auth/authenticate")
            .with(body: @credentials.to_json)
            .to_return(status: 200,
                       body: @api_response.to_json,
                       headers: { 'content-type' => 'application/json' })
 
-    account = Tyto::AuthenticateAccount.new(app.config).call(**@credentials)
+    result = Tyto::AuthenticateAccount.new(app.config).call(**@credentials)
 
-    _(account).wont_be_nil
-    _(account['username']).must_equal 'soumya.ray'
-    _(account['email']).must_equal 'sray@nthu.edu.tw'
-    _(account['include']).wont_be_nil
+    _(result).wont_be_nil
+    _(result[:auth_token]).must_equal 'opaque.encrypted.bearer'
+    _(result[:account]['attributes']['username']).must_equal 'soumya.ray'
+    _(result[:account]['include']).wont_be_nil
   end
 
   it 'BAD: raises UnauthorizedError on 403' do

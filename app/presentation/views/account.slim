@@ -1,7 +1,7 @@
 - system_roles = (account.dig('include', 'system_roles') || []).sort
 - enrollments = account.dig('include', 'enrollments') || []
-- is_self = viewer && viewer['username'] == account['username']
-- viewer_is_admin = (viewer&.dig('include', 'system_roles') || []).include?('admin')
+- is_self = viewer && viewer.username == account['attributes']['username']
+- viewer_is_admin = viewer&.admin?
 - can_manage = viewer_is_admin && !is_self
 - assignable = %w[admin creator member] - system_roles
 
@@ -12,12 +12,12 @@ div class="container"
     div class="col-sm-3"
       strong Username:
     div class="col-sm-9"
-      = account['username']
+      = account['attributes']['username']
   div class="row mb-2"
     div class="col-sm-3"
       strong Email:
     div class="col-sm-9"
-      = account['email']
+      = account['attributes']['email']
 
   div class="row mb-3 mt-4"
     div class="col-sm-3"
@@ -30,14 +30,14 @@ div class="container"
           span class="badge bg-dark me-1"
             = role
           - if can_manage
-            form method='post' action="/account/#{account['username']}/system_roles/#{role}" class="d-inline me-2"
+            form method='post' action="/account/#{account['attributes']['username']}/system_roles/#{role}" class="d-inline me-2"
               input type='hidden' name='_method' value='delete'
               button type='submit' class="btn btn-sm btn-outline-danger py-0" Revoke
 
       - if can_manage && !assignable.empty?
         div class="mt-2 d-flex flex-wrap gap-2"
           - assignable.each do |role|
-            form method='post' action="/account/#{account['username']}/system_roles/#{role}" class="d-inline"
+            form method='post' action="/account/#{account['attributes']['username']}/system_roles/#{role}" class="d-inline"
               input type='hidden' name='_method' value='put'
               button type='submit' class="btn btn-sm btn-outline-primary"
                 | Grant&nbsp;

@@ -7,8 +7,8 @@ module Tyto
       @client = ApiClient.new(config)
     end
 
-    def call(username, current_account_id:)
-      @client.get("/accounts/#{username}", params: { current_account_id: current_account_id })
+    def call(current_account, username:)
+      @client.get("/accounts/#{username}", auth_token: current_account.auth_token)
     end
   end
 end

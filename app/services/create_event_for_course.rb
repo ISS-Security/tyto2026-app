@@ -11,17 +11,17 @@ module Tyto
       @client = ApiClient.new(config)
     end
 
-    def call(current_account_id:, course_id:, name:, start_at:, end_at:, location_id:) # rubocop:disable Metrics/ParameterLists
+    def call(current_account, course_id:, name:, start_at:, end_at:, location_id:) # rubocop:disable Metrics/ParameterLists
       start_iso = to_iso8601(start_at, 'start_at')
       end_iso = to_iso8601(end_at, 'end_at')
       loc_id = Integer(location_id, exception: false)
 
       validate!(name: name, start_iso: start_iso, end_iso: end_iso, location_id: loc_id)
 
-      @client.authenticated_post(
+      @client.post(
         "/courses/#{course_id}/events",
         { name: name, start_at: start_iso, end_at: end_iso, location_id: loc_id },
-        current_account_id: current_account_id
+        auth_token: current_account.auth_token
       )
     end
 
