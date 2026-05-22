@@ -23,7 +23,7 @@ module Tyto
         auth_token: attributes.fetch('auth_token')
       }
     rescue ApiClient::ApiError => e
-      raise UnauthorizedError, "Authentication failed: #{e.message}" if e.status == 403
+      raise UnauthorizedError, "Authentication failed: #{e.message}" if e.status == 401
       raise ApiServerError, e.message if e.status >= 500
 
       raise

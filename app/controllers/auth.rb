@@ -35,12 +35,11 @@ module Tyto
           routing.redirect '/'
         rescue AuthenticateAccount::UnauthorizedError
           flash.now[:error] = { credentials: 'Username and password did not match our records' }
-          response.status = 400
+          response.status = 401
           view :login
         rescue AuthenticateAccount::ApiServerError => e
           App.logger.warn "API server error: #{e.inspect}"
           flash[:error] = 'Our servers are not responding -- please try later'
-          response.status = 500
           routing.redirect @login_route
         end
       end
