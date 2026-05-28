@@ -80,18 +80,26 @@ module Tyto
         end
 
         # GET /account/[username]
+        # Always fetches via the API so the response carries a freshly-minted
+        # READ_ONLY key. That key is shown only on the *self* view (Q2) -- never
+        # when an admin views another account, which would leak a usable key.
+        # `api_key` is passed explicitly (not `account.auth_token`) so the
+        # self-fallback below can never surface the FULL session token.
         routing.get do
+          is_self = @current_account.username == username
+          account = GetAccount.new(App.config).call(@current_account, username: username)
+          view :account, locals: {
+            account: account, viewer: @current_account,
+            api_key: (is_self ? account.auth_token : nil)
+          }
+        rescue ApiClient::ApiError => e
+          App.logger.warn "Could not load account #{username}: #{e.inspect}"
           if @current_account.username == username
-            view :account, locals: { account: @current_account, viewer: @current_account }
-          elsif @current_account.admin?
-            begin
-              response = GetAccount.new(App.config).call(@current_account, username: username)
-              view :account, locals: { account: Account.from_api(response), viewer: @current_account }
-            rescue ApiClient::ApiError => e
-              flash[:error] = "Could not load account: #{e.message}"
-              routing.redirect "/account/#{@current_account.username}"
-            end
+            # Self-view fallback: render the cached session account with no key
+            # (avoids a redirect loop and never displays the full session token).
+            view :account, locals: { account: @current_account, viewer: @current_account, api_key: nil }
           else
+            flash[:error] = 'Could not load that account'
             routing.redirect "/account/#{@current_account.username}"
           end
         end
