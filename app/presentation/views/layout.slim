@@ -24,3 +24,6 @@ html
       section
         == render :flash_bar
         == yield
+
+    / Geolocate-on-submit behaviour for check-in forms (event-delegated).
+    == render :_checkin_geolocate

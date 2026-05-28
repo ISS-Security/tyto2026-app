@@ -27,7 +27,9 @@ module Tyto
             RecordAttendance.new(App.config).call(
               @current_account,
               course_id: course_id,
-              event_id: routing.params['event_id']
+              event_id: routing.params['event_id'],
+              longitude: routing.params['longitude'],
+              latitude: routing.params['latitude']
             )
             flash[:notice] = 'Checked in to event'
             routing.redirect "/courses/#{course_id}"

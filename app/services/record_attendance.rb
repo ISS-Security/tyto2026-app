@@ -7,10 +7,10 @@ module Tyto
       @client = ApiClient.new(config)
     end
 
-    def call(current_account, course_id:, event_id:)
+    def call(current_account, course_id:, event_id:, longitude:, latitude:)
       @client.post(
         "/courses/#{course_id}/attendances",
-        { event_id: event_id },
+        { event_id: event_id, longitude: longitude, latitude: latitude },
         auth_token: current_account.auth_token
       )
     end
