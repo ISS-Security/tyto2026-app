@@ -1,0 +1,9 @@
+- errors = (flash[:error].is_a?(Hash) ? flash[:error] : nil)
+- if errors && !errors.empty?
+  div class="alert alert-danger"
+    ul class="mb-0"
+      - errors.each do |field, message|
+        li
+          strong
+            = field.to_s.capitalize
+          = ": #{message}"

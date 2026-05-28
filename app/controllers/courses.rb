@@ -50,13 +50,21 @@ module Tyto
 
           # POST /courses/[course_id]/events
           routing.post do
+            validation = Tyto::Form::NewEvent.call(routing.params)
+            if validation.failure?
+              flash.now[:error] = Tyto::Form.validation_errors(validation)
+              next view('courses/events/new', locals: {
+                          course: GetCourse.new(App.config).call(@current_account, course_id: course_id)
+                        })
+            end
+
             CreateEventForCourse.new(App.config).call(
               @current_account,
               course_id: course_id,
-              name: routing.params['name'],
-              start_at: routing.params['start_at'],
-              end_at: routing.params['end_at'],
-              location_id: routing.params['location_id']
+              name: validation[:name],
+              start_at: validation[:start_at],
+              end_at: validation[:end_at],
+              location_id: validation[:location_id]
             )
             flash[:notice] = 'Event scheduled'
             routing.redirect "/courses/#{course_id}"
@@ -69,17 +77,24 @@ module Tyto
         routing.on 'locations' do
           # GET /courses/[course_id]/locations/new
           routing.is 'new' do
+            @load_maps = true
             view 'courses/locations/new', locals: { course_id: course_id }
           end
 
           # POST /courses/[course_id]/locations
           routing.post do
+            validation = Tyto::Form::NewLocation.call(routing.params)
+            if validation.failure?
+              flash.now[:error] = Tyto::Form.validation_errors(validation)
+              next view('courses/locations/new', locals: { course_id: course_id })
+            end
+
             CreateLocationForCourse.new(App.config).call(
               @current_account,
               course_id: course_id,
-              name: routing.params['name'],
-              latitude: routing.params['latitude'],
-              longitude: routing.params['longitude']
+              name: validation[:name],
+              latitude: validation[:latitude],
+              longitude: validation[:longitude]
             )
             flash[:notice] = 'Location added'
             routing.redirect "/courses/#{course_id}"
@@ -97,11 +112,17 @@ module Tyto
 
           # POST /courses/[course_id]/enrollments
           routing.post do
+            validation = Tyto::Form::EnrollmentByEmail.call(routing.params)
+            if validation.failure?
+              flash.now[:error] = Tyto::Form.validation_errors(validation)
+              next view('courses/enrollments/new', locals: { course_id: course_id })
+            end
+
             EnrollAccountInCourse.new(App.config).call(
               @current_account,
               course_id: course_id,
-              username: routing.params['username'],
-              role_name: routing.params['role_name']
+              username: validation[:username],
+              role_name: validation[:role_name]
             )
             flash[:notice] = 'Member enrolled'
             routing.redirect "/courses/#{course_id}"
@@ -129,6 +150,7 @@ module Tyto
 
         # GET /courses/[course_id]
         routing.get do
+          @load_maps = true # Course detail may render attendance maps for live events
           view 'courses/show',
                locals: {
                  course: GetCourse.new(App.config).call(@current_account, course_id: course_id),
@@ -149,10 +171,16 @@ module Tyto
 
       # POST /courses
       routing.post do
+        validation = Tyto::Form::NewCourse.call(routing.params)
+        if validation.failure?
+          flash.now[:error] = Tyto::Form.validation_errors(validation)
+          next view('courses/new')
+        end
+
         CreateCourse.new(App.config).call(
           @current_account,
-          name: routing.params['name'],
-          description: routing.params['description']
+          name: validation[:name],
+          description: validation[:description]
         )
         flash[:notice] = 'Course created'
         routing.redirect '/courses'

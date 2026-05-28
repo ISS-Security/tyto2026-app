@@ -12,18 +12,21 @@ module Tyto
         # Completes registration by setting a password.
         routing.post do
           token = RegistrationToken.load(username_or_token)
-          password = routing.params['password'].to_s
-          password_confirm = routing.params['password_confirm'].to_s
 
-          if password.empty? || password != password_confirm
-            flash[:error] = 'Passwords did not match'
-            routing.redirect "/auth/register/#{username_or_token}"
+          validation = Tyto::Form::Passwords.call(routing.params)
+          if validation.failure?
+            flash.now[:error] = Tyto::Form.validation_errors(validation)
+            next view(:register_confirm, locals: {
+                        registration_token: username_or_token,
+                        email: token.email,
+                        username: token.username
+                      })
           end
 
           CreateAccount.new(App.config).call(
             email: token.email,
             username: token.username,
-            password: password
+            password: validation[:password]
           )
           flash[:notice] = 'Account created -- please log in'
           routing.redirect '/auth/login'
@@ -79,12 +82,11 @@ module Tyto
         # GET /account/[username]
         routing.get do
           if @current_account.username == username
-            view :account, locals: { account: @current_account.account_info, viewer: @current_account }
+            view :account, locals: { account: @current_account, viewer: @current_account }
           elsif @current_account.admin?
             begin
               response = GetAccount.new(App.config).call(@current_account, username: username)
-              target = response.fetch('attributes').merge('include' => response['include'])
-              view :account, locals: { account: target, viewer: @current_account }
+              view :account, locals: { account: Account.from_api(response), viewer: @current_account }
             rescue ApiClient::ApiError => e
               flash[:error] = "Could not load account: #{e.message}"
               routing.redirect "/account/#{@current_account.username}"

@@ -19,25 +19,27 @@ module Tyto
 
         # POST /auth/login
         routing.post do
-          username = routing.params['username'].to_s.strip
-          password = routing.params['password'].to_s
+          validation = Tyto::Form::LoginCredentials.call(routing.params)
+          if validation.failure?
+            flash.now[:error] = Tyto::Form.validation_errors(validation)
+            next view(:login)
+          end
 
           authed = AuthenticateAccount.new(App.config).call(
-            username: username, password: password
+            username: validation[:username], password: validation[:password]
           )
-          account = Account.new(authed[:account], authed[:auth_token])
+          account = Account.from_api(authed[:account], authed[:auth_token])
 
           CurrentSession.new(session).current_account = account
           flash[:notice] = "Welcome back #{account.username}!"
           routing.redirect '/'
         rescue AuthenticateAccount::UnauthorizedError
-          flash.now[:error] = 'Username and password did not match our records'
-          response.status = 400
+          flash.now[:error] = { credentials: 'Username and password did not match our records' }
+          response.status = 401
           view :login
         rescue AuthenticateAccount::ApiServerError => e
           App.logger.warn "API server error: #{e.inspect}"
           flash[:error] = 'Our servers are not responding -- please try later'
-          response.status = 500
           routing.redirect @login_route
         end
       end
@@ -74,15 +76,20 @@ module Tyto
 
           # POST /auth/register
           routing.post do
+            validation = Tyto::Form::Registration.call(routing.params)
+            if validation.failure?
+              flash.now[:error] = Tyto::Form.validation_errors(validation)
+              next view(:register)
+            end
+
             VerifyRegistration.new(App.config).call(
-              email: routing.params['email'].to_s.strip,
-              username: routing.params['username'].to_s.strip
+              email: validation[:email], username: validation[:username]
             )
             flash[:notice] = 'Check your email for a verification link'
             routing.redirect '/'
           rescue VerifyRegistration::VerificationError => e
-            flash[:error] = e.message
-            routing.redirect @register_route
+            flash.now[:error] = { registration: e.message }
+            view :register
           rescue VerifyRegistration::ApiServerError => e
             App.logger.warn "API server error: #{e.inspect}"
             flash[:error] = 'Our servers are not responding -- please try later'

@@ -12,6 +12,7 @@ module Tyto
       @client
         .get('/attendances/eligible', auth_token: current_account.auth_token)
         .fetch('data', [])
+        .map { |envelope| Event.from_api(envelope) }
     end
   end
 end

@@ -1,4 +1,7 @@
-- if flash[:error]
+/ Hash-shaped flash[:error] payloads come from form-validation failures and
+/ are rendered field-by-field by _validation_errors.slim on the form view.
+/ This bar only handles string-shaped errors (e.g. "Our servers are not responding").
+- if flash[:error] && !flash[:error].is_a?(Hash)
   div class="alert alert-danger" id="flash_bar_danger"
     = flash[:error]
 - if flash[:notice]

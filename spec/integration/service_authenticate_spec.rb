@@ -38,10 +38,10 @@ describe 'AuthenticateAccount service' do
     _(result[:account]['include']).wont_be_nil
   end
 
-  it 'BAD: raises UnauthorizedError on 403' do
+  it 'BAD: raises UnauthorizedError on 401' do
     WebMock.stub_request(:post, "#{API_URL}/auth/authenticate")
            .with(body: @bad_credentials.to_json)
-           .to_return(status: 403,
+           .to_return(status: 401,
                       body: { message: 'Invalid credentials' }.to_json,
                       headers: { 'content-type' => 'application/json' })
 
