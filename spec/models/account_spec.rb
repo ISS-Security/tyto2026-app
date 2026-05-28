@@ -60,6 +60,18 @@ describe 'Account parser model' do
     end
   end
 
+  describe 'avatar (attribute-backed)' do
+    it 'HAPPY: returns the avatar URL when present (SSO account)' do
+      info = account_info
+      info['attributes']['avatar'] = 'https://lh3.googleusercontent.com/a/pic'
+      _(Tyto::Account.from_api(info, 'tok').avatar).must_equal 'https://lh3.googleusercontent.com/a/pic'
+    end
+
+    it 'EDGE: nil when no avatar attribute (password account)' do
+      _(Tyto::Account.from_api(account_info, 'tok').avatar).must_be_nil
+    end
+  end
+
   describe 'roles_for_course (enrollments-backed, unchanged)' do
     let(:enrollments) do
       [

@@ -7,6 +7,14 @@
 h1 Account Details
 
 div class="container"
+  / Avatar shown only when present (SSO accounts); password accounts render
+  / nothing here — no placeholder.
+  - if account.avatar
+    div class="row mb-3"
+      div class="col-sm-3"
+        strong Avatar:
+      div class="col-sm-9"
+        img src=account.avatar alt="Profile photo" class="rounded" width="72" height="72"
   div class="row mb-2"
     div class="col-sm-3"
       strong Username:

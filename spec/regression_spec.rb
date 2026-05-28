@@ -87,3 +87,24 @@ describe 'Regression: Account#admin? + course_creator? read capabilities' do
     _(src).must_match(/def course_creator\?\s*\n\s*capabilities\[['"]can_create_course['"]\]/)
   end
 end
+
+describe 'Regression: Google SSO login wiring' do
+  # Lexical guards for the 5-sso-auth flow (no Rack::Test/session harness yet).
+  it 'login.slim renders the Google sign-in button via google_oauth_url' do
+    src = File.read(File.expand_path('../app/presentation/views/login.slim', __dir__))
+    _(src).must_match(/href=google_oauth_url/)
+    _(src).must_match(/Sign in with Google/)
+  end
+
+  it 'auth controller verifies the OAuth state nonce on the SSO callback' do
+    src = File.read(File.expand_path('../app/controllers/auth.rb', __dir__))
+    _(src).must_match(/sso_callback/)
+    _(src).must_match(/session\.delete\(['"]sso_state['"]\)/)
+    _(src).must_match(/routing\.params\[['"]state['"]\]/)
+  end
+
+  it 'account.slim renders the avatar only when present' do
+    src = File.read(File.expand_path('../app/presentation/views/account.slim', __dir__))
+    _(src).must_match(/if account\.avatar/)
+  end
+end
