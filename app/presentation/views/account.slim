@@ -7,6 +7,14 @@
 h1 Account Details
 
 div class="container"
+  / Avatar shown only when present (SSO accounts); password accounts render
+  / nothing here — no placeholder.
+  - if account.avatar
+    div class="row mb-3"
+      div class="col-sm-3"
+        strong Avatar:
+      div class="col-sm-9"
+        img src=account.avatar alt="Profile photo" class="rounded" width="72" height="72"
   div class="row mb-2"
     div class="col-sm-3"
       strong Username:
@@ -55,3 +63,17 @@ div class="container"
               span class="me-2"
                 = e['course_name']
               == render '_role_badge', locals: { role: e['role'] }
+
+  - if is_self && api_key
+    div class="row top-buffer mt-4"
+      div class="col-sm-12"
+        h3 API Access
+        p class="text-muted mb-2"
+          ' Read-only API key (valid for one month). Hand this to a tool or
+          | deputy that should be able to read your data but never change it.
+        a class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" href="#api_key" role="button" aria-expanded="false" aria-controls="api_key"
+          | Show key
+        div id="api_key" class="collapse mt-2"
+          div class="card card-body"
+            pre class="text-wrap mb-0"
+              = api_key

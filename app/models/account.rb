@@ -48,6 +48,12 @@ module Tyto
       attributes&.dig('email')
     end
 
+    # Profile photo URL captured from a Google SSO login (`picture` claim).
+    # nil for password accounts; the account view renders it only when present.
+    def avatar
+      attributes&.dig('avatar')
+    end
+
     def admin?
       capabilities['is_admin'] || false
     end

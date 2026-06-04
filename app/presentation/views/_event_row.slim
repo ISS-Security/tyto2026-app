@@ -16,9 +16,12 @@ li class="list-group-item"
       - if event.attended?
         span class="badge bg-success" Attended &#10003;
       - elsif can_check_in && live_now
-        form method='post' action="/courses/#{course_id}/attendances" class="m-0"
+        form method='post' action="/courses/#{course_id}/attendances" class="m-0 checkin-form" id="checkin-form-#{event.id}"
           input type='hidden' name='event_id' value=event.id
+          input type='hidden' name='longitude' value=""
+          input type='hidden' name='latitude' value=""
           button type='submit' class="btn btn-sm btn-success" Check in
+          div class="checkin-error text-danger small mt-1" style="display: none;"
   - if show_map
     div class="mt-2"
       == render '_attendance_map', locals: { event: event }

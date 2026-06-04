@@ -28,6 +28,25 @@ describe 'Regression: account controller does not flatten API response' do
   end
 end
 
+describe 'Regression: account API key is shown only on the self-view' do
+  # The READ_ONLY key is the *viewed* account's key. Showing it when an admin
+  # views someone else would leak a usable key, so the controller passes
+  # `api_key` only when is_self, and the view gates the block on it. The key
+  # comes from `account.auth_token` (the fetched READ_ONLY token), never from
+  # the cached session account, so the full session token can't leak.
+  it 'controller passes the read-only key only on the self-view' do
+    src = File.read(File.expand_path('../app/controllers/account.rb', __dir__))
+    _(src).must_match(/api_key:\s*\(is_self \? account\.auth_token : nil\)/)
+  end
+
+  it 'account.slim gates the API Access block on is_self && api_key' do
+    src = File.read(File.expand_path(
+                      '../app/presentation/views/account.slim', __dir__
+                    ))
+    _(src).must_match(/if is_self && api_key/)
+  end
+end
+
 describe 'Regression: _attendance_map.slim quotes UUID event id' do
   # event.id is a UUID (string with hyphens). Unquoted interpolation
   # produces `var eventId = 01899a10-485e-4929-...;` which JS parses
@@ -66,5 +85,26 @@ describe 'Regression: Account#admin? + course_creator? read capabilities' do
 
   it 'course_creator? reads capabilities[can_create_course]' do
     _(src).must_match(/def course_creator\?\s*\n\s*capabilities\[['"]can_create_course['"]\]/)
+  end
+end
+
+describe 'Regression: Google SSO login wiring' do
+  # Lexical guards for the 5-sso-auth flow (no Rack::Test/session harness yet).
+  it 'login.slim renders the Google sign-in button via google_oauth_url' do
+    src = File.read(File.expand_path('../app/presentation/views/login.slim', __dir__))
+    _(src).must_match(/href=google_oauth_url/)
+    _(src).must_match(/Sign in with Google/)
+  end
+
+  it 'auth controller verifies the OAuth state nonce on the SSO callback' do
+    src = File.read(File.expand_path('../app/controllers/auth.rb', __dir__))
+    _(src).must_match(/sso_callback/)
+    _(src).must_match(/session\.delete\(['"]sso_state['"]\)/)
+    _(src).must_match(/routing\.params\[['"]state['"]\]/)
+  end
+
+  it 'account.slim renders the avatar only when present' do
+    src = File.read(File.expand_path('../app/presentation/views/account.slim', __dir__))
+    _(src).must_match(/if account\.avatar/)
   end
 end

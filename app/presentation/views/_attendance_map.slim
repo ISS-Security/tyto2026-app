@@ -41,6 +41,14 @@ javascript:
         function(position) {
           var myLat = position.coords.latitude;
           var myLon = position.coords.longitude;
+          // Feed the check-in form so submit sends coords without re-prompting.
+          var form = document.getElementById('checkin-form-' + eventId);
+          if (form) {
+            var lonEl = form.querySelector('input[name="longitude"]');
+            var latEl = form.querySelector('input[name="latitude"]');
+            if (lonEl) { lonEl.value = myLon; }
+            if (latEl) { latEl.value = myLat; }
+          }
           if (myMarker) {
             myMarker.setLatLng([myLat, myLon]);
           } else {
