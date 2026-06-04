@@ -15,8 +15,9 @@ form method='post' action="/courses/#{course_id}/locations" id='form-location' a
   input type='hidden' name='latitude' id='input-latitude' value=(params['latitude'] || '')
   input type='hidden' name='longitude' id='input-longitude' value=(params['longitude'] || '')
 
-  div id='location-map' style="height: 400px;" class="mb-3 rounded border"
-  div id='map-fallback' class="mb-3" style="display: none;"
+  / Map init: assets/js/location_form.js (inline scripts/styles blocked by CSP)
+  div id='location-map' class="map-canvas mb-3 rounded border"
+  div id='map-fallback' class="mb-3 d-none"
     div class="alert alert-warning"
       | Map unavailable. Enter coordinates manually.
     div class="row g-2"
@@ -34,89 +35,3 @@ form method='post' action="/courses/#{course_id}/locations" id='form-location' a
   button type='submit' id='submit-location' class="btn btn-primary" Save location
   a class="btn btn-link" href="/courses/#{course_id}" Cancel
 
-javascript:
-  (function() {
-    var latInput = document.getElementById('input-latitude');
-    var lonInput = document.getElementById('input-longitude');
-    var display = document.getElementById('coords-display');
-    var fallbackLat = document.getElementById('fallback-latitude');
-    var fallbackLon = document.getElementById('fallback-longitude');
-    var mapDiv = document.getElementById('location-map');
-    var fallbackDiv = document.getElementById('map-fallback');
-    var marker = null;
-    var map = null;
-
-    function setCoords(lat, lon) {
-      latInput.value = lat;
-      lonInput.value = lon;
-      display.textContent = 'Lat ' + parseFloat(lat).toFixed(6) + ', Lon ' + parseFloat(lon).toFixed(6);
-    }
-
-    function placeMarker(lat, lon) {
-      if (!map) return;
-      if (marker) {
-        marker.setLatLng([lat, lon]);
-      } else {
-        marker = L.marker([lat, lon], { draggable: true }).addTo(map);
-        marker.on('dragend', function(e) {
-          var pos = e.target.getLatLng();
-          setCoords(pos.lat, pos.lng);
-        });
-      }
-      setCoords(lat, lon);
-    }
-
-    function initMap() {
-      var center = window.TytoMaps.DEFAULT_CENTER;
-      var initialLat = parseFloat(latInput.value);
-      var initialLon = parseFloat(lonInput.value);
-      if (!isNaN(initialLat) && !isNaN(initialLon)) {
-        center = [initialLat, initialLon];
-      }
-      map = L.map('location-map').setView(center, window.TytoMaps.DEFAULT_ZOOM);
-      L.tileLayer(window.TytoMaps.OSM_TILE_URL, {
-        attribution: window.TytoMaps.OSM_ATTRIBUTION,
-        maxZoom: 19
-      }).addTo(map);
-      map.on('click', function(e) {
-        placeMarker(e.latlng.lat, e.latlng.lng);
-      });
-      if (!isNaN(initialLat) && !isNaN(initialLon)) {
-        placeMarker(initialLat, initialLon);
-      }
-    }
-
-    function showFallback() {
-      mapDiv.style.display = 'none';
-      fallbackDiv.style.display = 'block';
-      var sync = function() { setCoords(fallbackLat.value, fallbackLon.value); };
-      fallbackLat.addEventListener('change', sync);
-      fallbackLon.addEventListener('change', sync);
-    }
-
-    if (typeof L === 'undefined') {
-      window.addEventListener('leaflet:unavailable', showFallback);
-      // Belt-and-suspenders: if L never appears within 4s, fallback now.
-      setTimeout(function() { if (typeof L === 'undefined') showFallback(); }, 4000);
-    } else {
-      initMap();
-    }
-
-    document.getElementById('get-location-btn').addEventListener('click', function() {
-      if (!navigator.geolocation) {
-        alert('Geolocation is not supported by this browser.');
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        function(position) {
-          var lat = position.coords.latitude;
-          var lon = position.coords.longitude;
-          placeMarker(lat, lon);
-          if (map) map.setView([lat, lon], 17);
-        },
-        function(err) {
-          alert('Location permission denied or unavailable: ' + err.message);
-        }
-      );
-    });
-  })();

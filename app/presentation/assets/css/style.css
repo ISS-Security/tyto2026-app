@@ -12,3 +12,12 @@
   max-width: 35px;
   margin-top: -7px;
 }
+
+/* Map containers: sized via classes because the CSP blocks inline style= */
+.map-canvas {
+  height: 400px;
+}
+
+.map-canvas-sm {
+  height: 240px;
+}

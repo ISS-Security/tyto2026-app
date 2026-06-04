@@ -65,19 +65,34 @@ module Tyto
       # Suppresses log info/warning outputs in dev/test environments
       logger.level = Logger::ERROR
 
+      # Session cookie hardening: httponly keeps document.cookie away from
+      # scripts (XSS exfiltration); SameSite=Lax stops cross-site requests
+      # from carrying the session (CSRF). Set here rather than relying on
+      # secure_headers' cookie config: the session middleware is added
+      # first, so it sits OUTSIDE SecureHeaders::Middleware, which therefore
+      # never sees (or flags) the Set-Cookie header -- a quiet Credence gap
+      # found in smoke. No `secure:` in dev/test: rack-session refuses to
+      # commit a Secure cookie over a non-TLS request, so it would kill
+      # http://localhost logins outright (production sets it below).
+
       # Previous approach (rack-session 2.x AES-256-GCM cookie only --
       # superseded by the Pool/Redis split below):
       # use Rack::Session::Cookie,
-      #     expire_after: ONE_MONTH, secret: config.SESSION_SECRET
+      #     expire_after: ONE_MONTH, secret: config.SESSION_SECRET,
+      #     httponly: true, same_site: :lax
 
       use Rack::Session::Pool,
-          expire_after: ONE_MONTH
+          expire_after: ONE_MONTH,
+          httponly: true,
+          same_site: :lax
 
       # Uncomment to test the production Redis path locally
       # (requires `brew services start redis` or equivalent):
       # use Rack::Session::Redis,
       #     expire_after: ONE_MONTH,
-      #     redis_server: @redis_url
+      #     redis_server: @redis_url,
+      #     httponly: true,
+      #     same_site: :lax
 
       # Allows binding.pry to be used in development
       require 'pry'
@@ -96,9 +111,16 @@ module Tyto
       plugin :redirect_http_to_https
       plugin :hsts
 
+      # Same cookie hardening as dev/test plus Secure (TLS-only transport;
+      # production is always behind TLS, and rack-session only commits a
+      # Secure cookie over TLS requests). Credence only touched its dev
+      # block; production must not be weaker.
       use Rack::Session::Redis,
           expire_after: ONE_MONTH,
-          redis_server: @redis_server
+          redis_server: @redis_server,
+          secure: true,
+          httponly: true,
+          same_site: :lax
     end
   end
 end
