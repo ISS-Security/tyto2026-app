@@ -12,8 +12,8 @@ describe 'VerifyRegistration service' do
 
   it 'HAPPY: posts the registration + verification_url to the API and returns the data' do
     WebMock.stub_request(:post, "#{API_URL}/auth/register")
-           .to_return(status: 202, body: { message: 'Verification email sent' }.to_json,
-                      headers: { 'content-type' => 'application/json' })
+      .to_return(status: 202, body: { message: 'Verification email sent' }.to_json,
+                 headers: { 'content-type' => 'application/json' })
 
     result = Tyto::VerifyRegistration.new(app.config).call(**@registration)
 
@@ -44,8 +44,8 @@ describe 'VerifyRegistration service' do
 
   it 'BAD: raises VerificationError on 400 from API' do
     WebMock.stub_request(:post, "#{API_URL}/auth/register")
-           .to_return(status: 400, body: { message: 'Email already registered' }.to_json,
-                      headers: { 'content-type' => 'application/json' })
+      .to_return(status: 400, body: { message: 'Email already registered' }.to_json,
+                 headers: { 'content-type' => 'application/json' })
 
     _(proc {
       Tyto::VerifyRegistration.new(app.config).call(**@registration)
@@ -54,8 +54,8 @@ describe 'VerifyRegistration service' do
 
   it 'BAD: raises ApiServerError on 500' do
     WebMock.stub_request(:post, "#{API_URL}/auth/register")
-           .to_return(status: 500, body: { message: 'boom' }.to_json,
-                      headers: { 'content-type' => 'application/json' })
+      .to_return(status: 500, body: { message: 'boom' }.to_json,
+                 headers: { 'content-type' => 'application/json' })
 
     _(proc {
       Tyto::VerifyRegistration.new(app.config).call(**@registration)

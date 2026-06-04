@@ -35,7 +35,7 @@ module Tyto
 
     def exchange_code_for_id_token(code)
       response = HTTP.headers(accept: 'application/json')
-                     .post(@config.GOOGLE_TOKEN_URL, form: token_params(code))
+        .post(@config.GOOGLE_TOKEN_URL, form: token_params(code))
       raise UnauthorizedError unless response.status.success?
 
       JSON.parse(response.to_s).fetch('id_token')

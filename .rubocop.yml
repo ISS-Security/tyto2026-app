@@ -20,3 +20,6 @@ Style/HashSyntax:
   Enabled: true
   Exclude:
     - Rakefile
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented

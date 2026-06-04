@@ -26,12 +26,12 @@ describe 'AuthorizeGoogleAccount service' do
 
   it 'HAPPY: exchanges the code for an id_token, then trades it for a Tyto token' do
     google = WebMock.stub_request(:post, @token_url)
-                    .to_return(status: 200, body: { id_token: 'signed.jwt' }.to_json,
-                               headers: { 'content-type' => 'application/json' })
+      .to_return(status: 200, body: { id_token: 'signed.jwt' }.to_json,
+                 headers: { 'content-type' => 'application/json' })
     api = WebMock.stub_request(:post, "#{API_URL}/auth/sso")
-                 .with(body: { id_token: 'signed.jwt' })
-                 .to_return(status: 200, body: @api_response.to_json,
-                            headers: { 'content-type' => 'application/json' })
+      .with(body: { id_token: 'signed.jwt' })
+      .to_return(status: 200, body: @api_response.to_json,
+                 headers: { 'content-type' => 'application/json' })
 
     result = Tyto::AuthorizeGoogleAccount.new(app.config).call(@code)
 
@@ -44,8 +44,8 @@ describe 'AuthorizeGoogleAccount service' do
 
   it 'BAD: raises UnauthorizedError when Google rejects the code' do
     WebMock.stub_request(:post, @token_url)
-           .to_return(status: 400, body: { error: 'invalid_grant' }.to_json,
-                      headers: { 'content-type' => 'application/json' })
+      .to_return(status: 400, body: { error: 'invalid_grant' }.to_json,
+                 headers: { 'content-type' => 'application/json' })
 
     _(proc { Tyto::AuthorizeGoogleAccount.new(app.config).call(@code) })
       .must_raise Tyto::AuthorizeGoogleAccount::UnauthorizedError
@@ -53,11 +53,11 @@ describe 'AuthorizeGoogleAccount service' do
 
   it 'BAD: raises UnauthorizedError when the API rejects the id_token' do
     WebMock.stub_request(:post, @token_url)
-           .to_return(status: 200, body: { id_token: 'signed.jwt' }.to_json,
-                      headers: { 'content-type' => 'application/json' })
+      .to_return(status: 200, body: { id_token: 'signed.jwt' }.to_json,
+                 headers: { 'content-type' => 'application/json' })
     WebMock.stub_request(:post, "#{API_URL}/auth/sso")
-           .to_return(status: 401, body: { message: 'Invalid SSO credentials' }.to_json,
-                      headers: { 'content-type' => 'application/json' })
+      .to_return(status: 401, body: { message: 'Invalid SSO credentials' }.to_json,
+                 headers: { 'content-type' => 'application/json' })
 
     _(proc { Tyto::AuthorizeGoogleAccount.new(app.config).call(@code) })
       .must_raise Tyto::AuthorizeGoogleAccount::UnauthorizedError
