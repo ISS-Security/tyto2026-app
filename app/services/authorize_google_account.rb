@@ -54,7 +54,10 @@ module Tyto
     end
 
     def authorize_with_api(id_token)
-      response = @client.post('/auth/sso', { id_token: id_token })
+      signed_sso_info = { id_token: id_token }
+        .then { |sso_info| SignedMessage.sign(sso_info) }
+
+      response = @client.post('/auth/sso', signed_sso_info)
       attributes = response.fetch('data').fetch('attributes')
       { account: attributes.fetch('account'), auth_token: attributes['auth_token'] }
     rescue ApiClient::ApiError

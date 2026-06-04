@@ -29,7 +29,7 @@ describe 'AuthorizeGoogleAccount service' do
       .to_return(status: 200, body: { id_token: 'signed.jwt' }.to_json,
                  headers: { 'content-type' => 'application/json' })
     api = WebMock.stub_request(:post, "#{API_URL}/auth/sso")
-      .with(body: { id_token: 'signed.jwt' })
+      .with(body: Tyto::SignedMessage.sign({ id_token: 'signed.jwt' }).to_json)
       .to_return(status: 200, body: @api_response.to_json,
                  headers: { 'content-type' => 'application/json' })
 

@@ -20,7 +20,7 @@ module Tyto
       verification_url = "#{@config.APP_URL}/auth/register/#{registration_token}"
       registration_data = { email: email, username: username, verification_url: verification_url }
 
-      @client.post('/auth/register', registration_data)
+      @client.post('/auth/register', SignedMessage.sign(registration_data))
       registration_data
     rescue ApiClient::ApiError => e
       raise ApiServerError, e.message if e.status >= 500

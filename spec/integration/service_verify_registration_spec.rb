@@ -20,7 +20,8 @@ describe 'VerifyRegistration service' do
     _(result[:email]).must_equal @registration[:email]
     assert_requested(:post, "#{API_URL}/auth/register") do |req|
       body = JSON.parse(req.body)
-      body['verification_url'].start_with?("#{app.config.APP_URL}/auth/register/")
+      body['data']['verification_url'].start_with?("#{app.config.APP_URL}/auth/register/") &&
+        !body['signature'].to_s.empty?
     end
   end
 
@@ -30,7 +31,7 @@ describe 'VerifyRegistration service' do
     decrypted = nil
     WebMock.stub_request(:post, "#{API_URL}/auth/register").to_return(status: 202).with do |req|
       body = JSON.parse(req.body)
-      token = body['verification_url'].split('/').last
+      token = body['data']['verification_url'].split('/').last
       decrypted = Tyto::SecureMessage.new(token).decrypt
       true
     end

@@ -14,7 +14,7 @@ describe 'CreateAccount service' do
 
   it 'HAPPY: posts to /accounts and returns on 201' do
     WebMock.stub_request(:post, "#{API_URL}/accounts")
-      .with(body: @new_account.to_json)
+      .with(body: Tyto::SignedMessage.sign(@new_account).to_json)
       .to_return(status: 201,
                  body: { message: 'Account created', data: { username: 'new_user' } }.to_json,
                  headers: { 'content-type' => 'application/json' })
@@ -27,7 +27,7 @@ describe 'CreateAccount service' do
 
   it 'BAD: raises InvalidAccount on 400 (mass-assignment)' do
     WebMock.stub_request(:post, "#{API_URL}/accounts")
-      .with(body: @new_account.to_json)
+      .with(body: Tyto::SignedMessage.sign(@new_account).to_json)
       .to_return(status: 400,
                  body: { message: 'Illegal Attributes' }.to_json,
                  headers: { 'content-type' => 'application/json' })
@@ -39,7 +39,7 @@ describe 'CreateAccount service' do
 
   it 'BAD: raises InvalidAccount on 500' do
     WebMock.stub_request(:post, "#{API_URL}/accounts")
-      .with(body: @new_account.to_json)
+      .with(body: Tyto::SignedMessage.sign(@new_account).to_json)
       .to_return(status: 500,
                  body: { message: 'boom' }.to_json,
                  headers: { 'content-type' => 'application/json' })
