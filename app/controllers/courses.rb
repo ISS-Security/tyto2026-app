@@ -47,7 +47,7 @@ module Tyto
           # GET /courses/[course_id]/events/new
           routing.is 'new' do
             view 'courses/events/new',
-                 locals: { course: GetCourse.new(App.config).call(@current_account, course_id: course_id) }
+              locals: { course: GetCourse.new(App.config).call(@current_account, course_id: course_id) }
           end
 
           # POST /courses/[course_id]/events
@@ -56,8 +56,8 @@ module Tyto
             if validation.failure?
               flash.now[:error] = Tyto::Form.validation_errors(validation)
               next view('courses/events/new', locals: {
-                          course: GetCourse.new(App.config).call(@current_account, course_id: course_id)
-                        })
+                course: GetCourse.new(App.config).call(@current_account, course_id: course_id)
+              })
             end
 
             CreateEventForCourse.new(App.config).call(
@@ -154,11 +154,11 @@ module Tyto
         routing.get do
           @load_maps = true # Course detail may render attendance maps for live events
           view 'courses/show',
-               locals: {
-                 course: GetCourse.new(App.config).call(@current_account, course_id: course_id),
-                 current_account: @current_account,
-                 my_roles: @current_account.roles_for_course(course_id)
-               }
+            locals: {
+              course: GetCourse.new(App.config).call(@current_account, course_id: course_id),
+              current_account: @current_account,
+              my_roles: @current_account.roles_for_course(course_id)
+            }
         rescue ApiClient::ApiError => e
           flash[:error] = "Could not load course: #{e.message}"
           routing.redirect '/courses'
@@ -168,7 +168,7 @@ module Tyto
       # GET /courses
       routing.get do
         view 'courses/index',
-             locals: { courses: ListCourses.new(App.config).call(@current_account) }
+          locals: { courses: ListCourses.new(App.config).call(@current_account) }
       end
 
       # POST /courses

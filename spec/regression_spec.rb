@@ -41,8 +41,8 @@ describe 'Regression: account API key is shown only on the self-view' do
 
   it 'account.slim gates the API Access block on is_self && api_key' do
     src = File.read(File.expand_path(
-                      '../app/presentation/views/account.slim', __dir__
-                    ))
+      '../app/presentation/views/account.slim', __dir__
+    ))
     _(src).must_match(/if is_self && api_key/)
   end
 end
@@ -56,15 +56,15 @@ describe 'Regression: attendance map receives UUID event id as a string' do
   # that wiring.
   it 'the slim partial passes event id via data-event-id' do
     src = File.read(File.expand_path(
-                      '../app/presentation/views/_attendance_map.slim', __dir__
-                    ))
+      '../app/presentation/views/_attendance_map.slim', __dir__
+    ))
     _(src).must_match(/data-event-id=event\.id/)
   end
 
   it 'attendance_map.js reads the id with getAttribute (string-safe)' do
     src = File.read(File.expand_path(
-                      '../app/presentation/assets/js/maps/attendance_map.js', __dir__
-                    ))
+      '../app/presentation/assets/js/maps/attendance_map.js', __dir__
+    ))
     _(src).must_match(/getAttribute\('data-event-id'\)/)
   end
 end
@@ -76,8 +76,8 @@ describe 'Regression: flash_bar.slim skips Hash-shaped errors' do
   # `{username: "must be filled", ...}` text above the form.
   it 'flash_bar guards against Hash-shaped flash[:error]' do
     src = File.read(File.expand_path(
-                      '../app/presentation/views/flash_bar.slim', __dir__
-                    ))
+      '../app/presentation/views/flash_bar.slim', __dir__
+    ))
     _(src).must_match(/is_a\?\(Hash\)/)
   end
 end

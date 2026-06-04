@@ -78,21 +78,21 @@ module Tyto
       # Previous approach (rack-session 2.x AES-256-GCM cookie only --
       # superseded by the Pool/Redis split below):
       # use Rack::Session::Cookie,
-      #     expire_after: ONE_MONTH, secret: config.SESSION_SECRET,
-      #     httponly: true, same_site: :lax
+      #   expire_after: ONE_MONTH, secret: config.SESSION_SECRET,
+      #   httponly: true, same_site: :lax
 
       use Rack::Session::Pool,
-          expire_after: ONE_MONTH,
-          httponly: true,
-          same_site: :lax
+        expire_after: ONE_MONTH,
+        httponly: true,
+        same_site: :lax
 
       # Uncomment to test the production Redis path locally
       # (requires `brew services start redis` or equivalent):
       # use Rack::Session::Redis,
-      #     expire_after: ONE_MONTH,
-      #     redis_server: @redis_url,
-      #     httponly: true,
-      #     same_site: :lax
+      #   expire_after: ONE_MONTH,
+      #   redis_server: @redis_url,
+      #   httponly: true,
+      #   same_site: :lax
 
       # Allows binding.pry to be used in development
       require 'pry'
@@ -116,11 +116,11 @@ module Tyto
       # Secure cookie over TLS requests). Credence only touched its dev
       # block; production must not be weaker.
       use Rack::Session::Redis,
-          expire_after: ONE_MONTH,
-          redis_server: @redis_server,
-          secure: true,
-          httponly: true,
-          same_site: :lax
+        expire_after: ONE_MONTH,
+        redis_server: @redis_server,
+        secure: true,
+        httponly: true,
+        same_site: :lax
     end
   end
 end

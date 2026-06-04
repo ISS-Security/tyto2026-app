@@ -7,7 +7,7 @@ module Tyto
   # Parser model for an Event API envelope.
   class Event
     attr_reader :id, :name, :start_at, :end_at, :my_attendance_id, :location, :policies,
-                :course_id, :course_name
+      :course_id, :course_name
 
     def self.from_api(envelope)
       new(envelope)

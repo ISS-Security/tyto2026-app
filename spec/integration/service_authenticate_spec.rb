@@ -27,8 +27,8 @@ describe 'AuthenticateAccount service' do
     WebMock.stub_request(:post, "#{API_URL}/auth/authenticate")
       .with(body: Tyto::SignedMessage.sign(@credentials).to_json)
       .to_return(status: 200,
-                 body: @api_response.to_json,
-                 headers: { 'content-type' => 'application/json' })
+        body: @api_response.to_json,
+        headers: { 'content-type' => 'application/json' })
 
     result = Tyto::AuthenticateAccount.new(app.config).call(**@credentials)
 
@@ -42,8 +42,8 @@ describe 'AuthenticateAccount service' do
     WebMock.stub_request(:post, "#{API_URL}/auth/authenticate")
       .with(body: Tyto::SignedMessage.sign(@bad_credentials).to_json)
       .to_return(status: 401,
-                 body: { message: 'Invalid credentials' }.to_json,
-                 headers: { 'content-type' => 'application/json' })
+        body: { message: 'Invalid credentials' }.to_json,
+        headers: { 'content-type' => 'application/json' })
 
     _(proc {
       Tyto::AuthenticateAccount.new(app.config).call(**@bad_credentials)
@@ -54,8 +54,8 @@ describe 'AuthenticateAccount service' do
     WebMock.stub_request(:post, "#{API_URL}/auth/authenticate")
       .with(body: Tyto::SignedMessage.sign(@credentials).to_json)
       .to_return(status: 500,
-                 body: { message: 'boom' }.to_json,
-                 headers: { 'content-type' => 'application/json' })
+        body: { message: 'boom' }.to_json,
+        headers: { 'content-type' => 'application/json' })
 
     _(proc {
       Tyto::AuthenticateAccount.new(app.config).call(**@credentials)

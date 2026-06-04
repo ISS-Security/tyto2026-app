@@ -31,7 +31,7 @@ describe 'GetAccount service' do
   it 'HAPPY: parses the account and the READ_ONLY token from the envelope' do
     WebMock.stub_request(:get, "#{API_URL}/accounts/me")
       .to_return(status: 200, body: @api_response.to_json,
-                 headers: { 'content-type' => 'application/json' })
+        headers: { 'content-type' => 'application/json' })
 
     account = Tyto::GetAccount.new(app.config).call(@current, username: 'me')
 
@@ -45,7 +45,7 @@ describe 'GetAccount service' do
     stub = WebMock.stub_request(:get, "#{API_URL}/accounts/me")
       .with(headers: { 'Authorization' => 'Bearer full.session.token' })
       .to_return(status: 200, body: @api_response.to_json,
-                 headers: { 'content-type' => 'application/json' })
+        headers: { 'content-type' => 'application/json' })
 
     Tyto::GetAccount.new(app.config).call(@current, username: 'me')
     assert_requested(stub)
@@ -54,7 +54,7 @@ describe 'GetAccount service' do
   it 'BAD: raises ApiError when the API forbids the view (404)' do
     WebMock.stub_request(:get, "#{API_URL}/accounts/other")
       .to_return(status: 404, body: { message: 'Account not found' }.to_json,
-                 headers: { 'content-type' => 'application/json' })
+        headers: { 'content-type' => 'application/json' })
 
     _(proc { Tyto::GetAccount.new(app.config).call(@current, username: 'other') })
       .must_raise Tyto::ApiClient::ApiError

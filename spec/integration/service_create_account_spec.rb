@@ -16,8 +16,8 @@ describe 'CreateAccount service' do
     WebMock.stub_request(:post, "#{API_URL}/accounts")
       .with(body: Tyto::SignedMessage.sign(@new_account).to_json)
       .to_return(status: 201,
-                 body: { message: 'Account created', data: { username: 'new_user' } }.to_json,
-                 headers: { 'content-type' => 'application/json' })
+        body: { message: 'Account created', data: { username: 'new_user' } }.to_json,
+        headers: { 'content-type' => 'application/json' })
 
     result = Tyto::CreateAccount.new(app.config).call(**@new_account)
 
@@ -29,8 +29,8 @@ describe 'CreateAccount service' do
     WebMock.stub_request(:post, "#{API_URL}/accounts")
       .with(body: Tyto::SignedMessage.sign(@new_account).to_json)
       .to_return(status: 400,
-                 body: { message: 'Illegal Attributes' }.to_json,
-                 headers: { 'content-type' => 'application/json' })
+        body: { message: 'Illegal Attributes' }.to_json,
+        headers: { 'content-type' => 'application/json' })
 
     _(proc {
       Tyto::CreateAccount.new(app.config).call(**@new_account)
@@ -41,8 +41,8 @@ describe 'CreateAccount service' do
     WebMock.stub_request(:post, "#{API_URL}/accounts")
       .with(body: Tyto::SignedMessage.sign(@new_account).to_json)
       .to_return(status: 500,
-                 body: { message: 'boom' }.to_json,
-                 headers: { 'content-type' => 'application/json' })
+        body: { message: 'boom' }.to_json,
+        headers: { 'content-type' => 'application/json' })
 
     _(proc {
       Tyto::CreateAccount.new(app.config).call(**@new_account)
