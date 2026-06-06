@@ -25,10 +25,10 @@ describe 'AuthenticateAccount service' do
 
   it 'HAPPY: returns account hash and auth_token' do
     WebMock.stub_request(:post, "#{API_URL}/auth/authenticate")
-           .with(body: @credentials.to_json)
-           .to_return(status: 200,
-                      body: @api_response.to_json,
-                      headers: { 'content-type' => 'application/json' })
+      .with(body: Tyto::SignedMessage.sign(@credentials).to_json)
+      .to_return(status: 200,
+        body: @api_response.to_json,
+        headers: { 'content-type' => 'application/json' })
 
     result = Tyto::AuthenticateAccount.new(app.config).call(**@credentials)
 
@@ -40,10 +40,10 @@ describe 'AuthenticateAccount service' do
 
   it 'BAD: raises UnauthorizedError on 401' do
     WebMock.stub_request(:post, "#{API_URL}/auth/authenticate")
-           .with(body: @bad_credentials.to_json)
-           .to_return(status: 401,
-                      body: { message: 'Invalid credentials' }.to_json,
-                      headers: { 'content-type' => 'application/json' })
+      .with(body: Tyto::SignedMessage.sign(@bad_credentials).to_json)
+      .to_return(status: 401,
+        body: { message: 'Invalid credentials' }.to_json,
+        headers: { 'content-type' => 'application/json' })
 
     _(proc {
       Tyto::AuthenticateAccount.new(app.config).call(**@bad_credentials)
@@ -52,10 +52,10 @@ describe 'AuthenticateAccount service' do
 
   it 'BAD: raises ApiServerError on 500' do
     WebMock.stub_request(:post, "#{API_URL}/auth/authenticate")
-           .with(body: @credentials.to_json)
-           .to_return(status: 500,
-                      body: { message: 'boom' }.to_json,
-                      headers: { 'content-type' => 'application/json' })
+      .with(body: Tyto::SignedMessage.sign(@credentials).to_json)
+      .to_return(status: 500,
+        body: { message: 'boom' }.to_json,
+        headers: { 'content-type' => 'application/json' })
 
     _(proc {
       Tyto::AuthenticateAccount.new(app.config).call(**@credentials)

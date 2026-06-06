@@ -10,7 +10,9 @@ module Tyto
     end
 
     def call(email:, username:, password:)
-      @client.post('/accounts', { email: email, username: username, password: password })
+      account = { email: email, username: username, password: password }
+
+      @client.post('/accounts', SignedMessage.sign(account))
     rescue ApiClient::ApiError => e
       raise InvalidAccount, e.message
     end

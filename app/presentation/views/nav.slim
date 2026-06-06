@@ -11,6 +11,10 @@ nav role="navigation" class="navbar navbar-expand-sm navbar-dark bg-primary"
         - if @current_account.logged_in?
           li class="nav-item"
             a class="nav-link" href="/courses" Courses
+          / Admin-only: accounts index (week-10 system-role-management gap)
+          - if @current_account.admin?
+            li class="nav-item"
+              a class="nav-link" href="/admin/accounts" Members
           li class="nav-item dropdown"
             a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"
               = @current_account.username

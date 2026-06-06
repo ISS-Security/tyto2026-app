@@ -41,21 +41,31 @@ describe 'Regression: account API key is shown only on the self-view' do
 
   it 'account.slim gates the API Access block on is_self && api_key' do
     src = File.read(File.expand_path(
-                      '../app/presentation/views/account.slim', __dir__
-                    ))
+      '../app/presentation/views/account.slim', __dir__
+    ))
     _(src).must_match(/if is_self && api_key/)
   end
 end
 
-describe 'Regression: _attendance_map.slim quotes UUID event id' do
-  # event.id is a UUID (string with hyphens). Unquoted interpolation
-  # produces `var eventId = 01899a10-485e-4929-...;` which JS parses
-  # as a malformed scientific-notation literal ("missing exponent").
-  it 'event id is interpolated as a quoted JS string literal' do
+describe 'Regression: attendance map receives UUID event id as a string' do
+  # event.id is a UUID (string with hyphens). The original inline-JS bug
+  # interpolated it unquoted (`var eventId = 01899a10-...;` -- malformed
+  # scientific-notation literal). Since the week-15 CSP externalization the
+  # id travels via a data-* attribute and getAttribute always yields a
+  # string, which fixes the class of bug structurally -- these guards pin
+  # that wiring.
+  it 'the slim partial passes event id via data-event-id' do
     src = File.read(File.expand_path(
-                      '../app/presentation/views/_attendance_map.slim', __dir__
-                    ))
-    _(src).must_match(/var eventId = "/)
+      '../app/presentation/views/_attendance_map.slim', __dir__
+    ))
+    _(src).must_match(/data-event-id=event\.id/)
+  end
+
+  it 'attendance_map.js reads the id with getAttribute (string-safe)' do
+    src = File.read(File.expand_path(
+      '../app/presentation/assets/js/maps/attendance_map.js', __dir__
+    ))
+    _(src).must_match(/getAttribute\('data-event-id'\)/)
   end
 end
 
@@ -66,8 +76,8 @@ describe 'Regression: flash_bar.slim skips Hash-shaped errors' do
   # `{username: "must be filled", ...}` text above the form.
   it 'flash_bar guards against Hash-shaped flash[:error]' do
     src = File.read(File.expand_path(
-                      '../app/presentation/views/flash_bar.slim', __dir__
-                    ))
+      '../app/presentation/views/flash_bar.slim', __dir__
+    ))
     _(src).must_match(/is_a\?\(Hash\)/)
   end
 end

@@ -35,7 +35,7 @@ module Tyto
 
     def exchange_code_for_id_token(code)
       response = HTTP.headers(accept: 'application/json')
-                     .post(@config.GOOGLE_TOKEN_URL, form: token_params(code))
+        .post(@config.GOOGLE_TOKEN_URL, form: token_params(code))
       raise UnauthorizedError unless response.status.success?
 
       JSON.parse(response.to_s).fetch('id_token')
@@ -54,7 +54,10 @@ module Tyto
     end
 
     def authorize_with_api(id_token)
-      response = @client.post('/auth/sso', { id_token: id_token })
+      signed_sso_info = { id_token: id_token }
+        .then { |sso_info| SignedMessage.sign(sso_info) }
+
+      response = @client.post('/auth/sso', signed_sso_info)
       attributes = response.fetch('data').fetch('attributes')
       { account: attributes.fetch('account'), auth_token: attributes['auth_token'] }
     rescue ApiClient::ApiError

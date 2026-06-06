@@ -11,7 +11,14 @@ module Tyto
     use Rack::MethodOverride
 
     plugin :render, engine: 'slim', views: 'app/presentation/views'
-    plugin :assets, css: 'style.css', path: 'app/presentation/assets'
+    # JS is served as asset files from 'self' (the CSP blocks inline scripts);
+    # the :maps group loads only on pages that set @load_maps (layout.slim).
+    plugin :assets, path: 'app/presentation/assets',
+      css: 'style.css',
+      js: {
+        checkin: ['checkin_geolocate.js'],
+        maps: ['maps_loader.js', 'attendance_map.js', 'location_form.js']
+      }
     plugin :public, root: 'app/presentation/public'
     plugin :multi_route
     plugin :flash

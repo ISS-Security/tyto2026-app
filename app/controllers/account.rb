@@ -17,10 +17,10 @@ module Tyto
           if validation.failure?
             flash.now[:error] = Tyto::Form.validation_errors(validation)
             next view(:register_confirm, locals: {
-                        registration_token: username_or_token,
-                        email: token.email,
-                        username: token.username
-                      })
+              registration_token: username_or_token,
+              email: token.email,
+              username: token.username
+            })
           end
 
           CreateAccount.new(App.config).call(

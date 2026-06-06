@@ -1,0 +1,42 @@
+/ Admin Members page: read-only accounts index with system-role badges.
+/ Filter/sort controls are plain GET links -- the work happens server-side
+/ on the API (?role= / ?sort= forwarded by the controller), so this page
+/ stays a thin renderer. Rows pivot into /account/[username], the existing
+/ per-account management surface for granting/revoking roles.
+
+- filter_options = [['All', nil], ['admin', 'admin'], ['creator', 'creator'], ['member', 'member'], ['no roles', 'none']]
+- query_for = ->(role, sort_by) { [role ? "role=#{role}" : nil, sort_by ? "sort=#{sort_by}" : nil].compact.join('&') }
+- path_for = ->(role, sort_by) { q = query_for.call(role, sort_by); q.empty? ? '/admin/accounts' : "/admin/accounts?#{q}" }
+
+h1 Members
+
+div class="d-flex justify-content-between align-items-center mb-3"
+  div class="btn-group" role="group" aria-label="Filter by system role"
+    - filter_options.each do |label, value|
+      a class="btn btn-sm #{value == role_filter ? 'btn-primary' : 'btn-outline-primary'}" href=path_for.call(value, sort)
+        = label
+  div class="btn-group" role="group" aria-label="Sort"
+    a class="btn btn-sm #{sort == 'username' ? 'btn-secondary' : 'btn-outline-secondary'}" href=path_for.call(role_filter, 'username')
+      | Sort by username
+    a class="btn btn-sm #{sort == 'role' ? 'btn-secondary' : 'btn-outline-secondary'}" href=path_for.call(role_filter, 'role')
+      | Sort by role
+
+table class="table table-hover align-middle"
+  thead
+    tr
+      th Username
+      th System roles
+  tbody
+    - if accounts.empty?
+      tr
+        td colspan="2" class="text-muted text-center" No accounts match this filter
+    - accounts.each do |account|
+      tr
+        td
+          a href="/account/#{account.username}"
+            = account.username
+        td
+          - if account.system_roles.empty?
+            span class="text-muted small" no roles
+          - account.system_roles.each do |role|
+            == render '_role_badge', locals: { role: role }

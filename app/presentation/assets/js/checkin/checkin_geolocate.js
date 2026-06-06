@@ -1,0 +1,44 @@
+// Geolocate-on-submit for check-in forms (class "checkin-form").
+// If the form already carries coords (e.g. the course-page map pre-filled
+// them), submit straight through. Otherwise request browser geolocation,
+// fill the hidden longitude/latitude inputs, then submit. On denial, show
+// an inline error and re-enable the button. There is no manual-coord entry:
+// the geofence the API enforces depends on a real browser-reported position.
+// (Errors show/hide via the Bootstrap d-none class -- static style=
+// attributes would be blocked by the CSP, CSSOM class toggles are not.)
+(function() {
+  document.addEventListener('submit', function(e) {
+    var form = e.target;
+    if (!form.classList || !form.classList.contains('checkin-form')) { return; }
+    var lonEl = form.querySelector('input[name="longitude"]');
+    var latEl = form.querySelector('input[name="latitude"]');
+    if (lonEl && latEl && lonEl.value && latEl.value) { return; } // already located
+    e.preventDefault();
+    var errEl = form.querySelector('.checkin-error');
+    var btn = form.querySelector('button[type="submit"]');
+    function showError(msg) {
+      if (errEl) { errEl.textContent = msg; errEl.classList.remove('d-none'); }
+      if (btn) { btn.disabled = false; btn.textContent = 'Check in'; }
+    }
+    if (!navigator.geolocation) {
+      showError('Geolocation is not supported by this browser.');
+      return;
+    }
+    if (errEl) { errEl.classList.add('d-none'); }
+    if (btn) { btn.disabled = true; btn.textContent = 'Locating…'; }
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        if (lonEl) { lonEl.value = position.coords.longitude; }
+        if (latEl) { latEl.value = position.coords.latitude; }
+        form.submit();
+      },
+      function(err) {
+        if (err && err.code === 1) {
+          showError('Check-in requires location permission — adjust in browser site settings.');
+        } else {
+          showError('Location access required to check in.');
+        }
+      }
+    );
+  });
+})();

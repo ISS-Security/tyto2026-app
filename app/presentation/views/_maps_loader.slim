@@ -1,24 +1,7 @@
 / Leaflet (pinned to 1.9.4) loaded via CDN with SRI hashes.
 / OpenStreetMap tile URL is hard-coded — no API key required.
 / Attribution rendered automatically by Leaflet's attributionControl.
+/ Map init code lives in asset-served JS (assets/js/*) so the CSP can keep
+/ script_src strict — see the [:js, :maps] asset group emitted in layout.slim.
 link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"
 script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"
-
-javascript:
-  // Globals shared by the per-map init blocks below.
-  window.TytoMaps = {
-    OSM_TILE_URL: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    OSM_ATTRIBUTION: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    DEFAULT_CENTER: [24.7956, 120.9966], // NTHU campus
-    DEFAULT_ZOOM: 16
-  };
-  window.addEventListener('error', function(event) {
-    if (event && event.target && event.target.src && event.target.src.indexOf('leaflet.js') !== -1) {
-      window.dispatchEvent(new CustomEvent('leaflet:unavailable'));
-    }
-  }, true);
-  setTimeout(function() {
-    if (typeof L === 'undefined') {
-      window.dispatchEvent(new CustomEvent('leaflet:unavailable'));
-    }
-  }, 3000);

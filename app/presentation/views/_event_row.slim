@@ -21,7 +21,7 @@ li class="list-group-item"
           input type='hidden' name='longitude' value=""
           input type='hidden' name='latitude' value=""
           button type='submit' class="btn btn-sm btn-success" Check in
-          div class="checkin-error text-danger small mt-1" style="display: none;"
+          div class="checkin-error text-danger small mt-1 d-none"
   - if show_map
     div class="mt-2"
       == render '_attendance_map', locals: { event: event }

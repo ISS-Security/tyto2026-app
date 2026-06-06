@@ -16,7 +16,8 @@ module Tyto
     def call(username:, password:)
       validate_credentials!(username, password)
 
-      response = @client.post('/auth/authenticate', { username: username, password: password })
+      credentials = { username: username, password: password }
+      response = @client.post('/auth/authenticate', SignedMessage.sign(credentials))
       attributes = response.fetch('attributes')
       {
         account: attributes.fetch('account'),

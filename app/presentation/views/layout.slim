@@ -25,5 +25,9 @@ html
         == render :flash_bar
         == yield
 
+    / App JS served from 'self' as asset files — inline scripts are blocked
+    / by the CSP (script_src has no 'unsafe-inline').
     / Geolocate-on-submit behaviour for check-in forms (event-delegated).
-    == render :_checkin_geolocate
+    == assets([:js, :checkin])
+    - if @load_maps
+      == assets([:js, :maps])
